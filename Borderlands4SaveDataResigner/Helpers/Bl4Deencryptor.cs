@@ -258,14 +258,14 @@ public static class Bl4Deencryptor
     }
 
     /// <summary>
-    /// Updates the GUIDs in the provided YAML content based on the specified file name.
+    /// Anonymizes the data in the provided YAML content based on the specified file name.
     /// </summary>
     /// <param name="yamlContent">The YAML content as a byte array to be updated.</param>
-    /// <param name="fileNameWithoutExtension">The name of the file, without its extension, used to determine the type of GUID updates to apply.</param>
-    /// <param name="logger">An instance of <see cref="SimpleLogger"/> used to log warnings if the GUID updates fail.</param>
+    /// <param name="fileNameWithoutExtension">The name of the file, without its extension, used to determine the type of data updates to apply.</param>
+    /// <param name="logger">An instance of <see cref="SimpleLogger"/> used to log warnings if the anonymization fail.</param>
     /// <param name="loggerGroup">The logger group name used to categorize log messages.</param>
     /// <returns>A byte array containing the updated YAML content.</returns>
-    public static byte[] UpdateGuids(byte[] yamlContent, string fileNameWithoutExtension, SimpleLogger logger, string loggerGroup)
+    public static byte[] AnonymizeSaveData(byte[] yamlContent, string fileNameWithoutExtension, SimpleLogger logger, string loggerGroup)
     {
         var yamlContentText = Encoding.UTF8.GetString(yamlContent);
         if (fileNameWithoutExtension != "profile")
@@ -275,6 +275,8 @@ public static class Bl4Deencryptor
         }
         if (!UpdateSaveGuid(ref yamlContentText))
             logger.LogWarning("Save GUID could NOT be updated!", loggerGroup);
+        if (!AnonymizeOnlineCharacterPrefs(ref yamlContentText))
+            logger.LogWarning("OnlineCharacterPrefs could NOT be updated!", loggerGroup);
         return Encoding.UTF8.GetBytes(yamlContentText);
     }
 
@@ -310,6 +312,29 @@ public static class Bl4Deencryptor
         {
             replacementsCount++;
             return newGuid;
+        });
+        return replacementsCount > 0;
+    }
+
+    /// <summary>
+    /// Anonymizes the "onlinecharacterprefs" section in the provided text.
+    /// </summary>
+    /// <param name="dataText">A reference to the string containing the text to be updated. The method searches for the "onlinecharacterprefs" section and replaces it with a predefined structure.</param>
+    /// <returns><see langword="true"/> if the "onlinecharacterprefs" section was found and replaced; otherwise, <see langword="false"/>.</returns>
+    private static bool AnonymizeOnlineCharacterPrefs(ref string dataText)
+    {
+        const string pattern = @"onlinecharacterprefs:\s*(?:\n\s+.*)+";
+        // Replacement string
+        var replacement = """
+                          onlinecharacterprefs:
+                            recentfriends:
+                            partyleader:
+                          """;
+        var replacementsCount = 0;
+        dataText = Regex.Replace(dataText, pattern, _ =>
+        {
+            replacementsCount++;
+            return replacement;
         });
         return replacementsCount > 0;
     }

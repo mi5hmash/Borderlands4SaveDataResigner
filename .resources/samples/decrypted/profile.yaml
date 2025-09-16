@@ -1,0 +1,248 @@
+inputprefs: 
+  toggle_zoom: false
+  toggle_crouch: true
+  toggle_sprint: true
+  enable_dash: true
+  censor_content: false
+  display_damage_numbers: true
+  look_sensitivity_horizontal: 1.0
+  look_sensitivity_vertical: 1.0
+  ads_sensitivity_horizontal: 1.0
+  ads_sensitivity_vertical: 1.0
+  motion_controls_look_sensitivity_horizontal: 1.0
+  motion_controls_look_sensitivity_vertical: 1.0
+  motion_controls_ads_sensitivity_horizontal: 1.0
+  motion_controls_ads_sensitivity_vertical: 1.0
+  motion_controls_setting: 0
+  jcms_look_sensitivity_horizontal: 1.0
+  jcms_look_sensitivity_vertical: 1.0
+  jcms_ads_sensitivity_horizontal: 1.0
+  jcms_ads_sensitivity_vertical: 1.0
+  jcms_enable_control: 1
+  controller_ads_snap: true
+  mouse_ads_snap: false
+  controller_aim_assist: true
+  controller_aim_recentering: false
+  camera_head_bob: 1.0
+  mantle_with_forward: false
+  invert_look_x_axis_kbm: false
+  invert_look_y_axis_kbm: false
+  invert_move_x_axis_kbm: false
+  invert_move_y_axis_kbm: false
+  invert_look_x_axis_gamepad: false
+  invert_look_y_axis_gamepad: false
+  invert_move_x_axis_gamepad: false
+  invert_move_y_axis_gamepad: false
+  left_stick_radial_dead_zone_inner: 0.25
+  left_stick_radial_dead_zone_outer: 0.1
+  left_stick_axial_dead_zone_inner: 7.5
+  left_stick_axial_dead_zone_outer: 15.0
+  right_stick_radial_dead_zone_inner: 0.25
+  right_stick_radial_dead_zone_outer: 0.1
+  right_stick_axial_dead_zone_inner: 7.5
+  right_stick_axial_dead_zone_outer: 15.0
+  use_toggle_glide_kbm: false
+  use_toggle_glide_gamepad: true
+  crosshair_position: 1
+  compass_vertical_indicator_config: 0
+  radar_enabled: 0
+  vehicle_fov: 90.0
+  map_viewer_zoom_speed: 1.0
+  grapple_pitch_correction: true
+  on_foot_gamepad_stick_preset: 
+  is_southpaw_on_foot_gamepad_stick_preset_active: false
+  on_vehicle_gamepad_stick_preset: 
+  is_southpaw_on_vehicle_gamepad_stick_preset_active: false
+  rumble_enabled: true
+  camera_shake_intensity: 1.0
+  reactivetriggers_enabled: true
+  binding_profiles: 
+  - profile_identifier: InputUserSettings.Profiles.Default
+    class_path: /Script/EnhancedInput.EnhancedPlayerMappableKeyProfile
+    object_path: EnhancedPlayerMappableKeyProfile_2147376173
+    dirty_mappings: 
+ui: 
+  default: true
+  user_preferences: 
+    safe_area: 
+      horizontal_ratio: 0.0
+      vertical_ratio: 0.0
+    font_scaling: 
+      menu: 0
+      hud: 0
+    color_blind_mode: 0
+    high_contrast_mode: 
+      hud: false
+      crosshair: false
+  subtitles: 
+    size: 1.0
+    speaker_color: 
+    - 0.147027
+    - 0.577581
+    - 0.930111
+    - 1.0
+    text_opacity: 1.0
+    text_color: 
+    - 0.775822
+    - 0.693872
+    - 0.617207
+    - 1.0
+    background_opacity: 0.5
+    background_color: 
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    background_enabled: true
+    show_subtitle: true
+    show_speaker: true
+    use_bold_text: false
+  cursor_preferences: 
+    invert_x_axis: false
+    invert_y_axis: false
+    sensitivity: 0.8
+    friction_default: 0.4
+    show_idle_flash: false
+    max_idle_time: 60.0
+    pc_scroll_sensitivity: 5
+  first_time_calibration: 
+    shown_first_time_calibration: true
+  eula_data: 
+    accepted_eulas: 
+    - 22.1.2
+    - 23.1.2
+  contentwarning_data: 
+    photosensitivity_warning: true
+  tutorials: 
+    menu_tutorials_enabled: true
+    hud_tutorials_enabled: true
+    seen_menu_tutorials: 
+    - menu_tutorial_equipment
+    - menu_tutorial_reward_center
+    - menu_tutorial_missionlog_intro
+    - menu_tutorial_big_map_intro
+    - menu_tutorial_vending_machine
+    seen_hud_tutorials: 
+    - stats.tutorial.Walk
+    - stats.tutorial.checkpoints
+    - stats.tutorial.weapon_fire
+    - stats.tutorial.weapon_reload
+    - stats.tutorial.Repkit
+    - stats.tutorial.Jump
+    - stats.tutorial.double_jump
+    - stats.tutorial.Grapple
+    - stats.tutorial.Crouch
+    - stats.tutorial.Climb
+    - stats.tutorial.Shield
+    - stats.tutorial.actionskill_unlock
+    - stats.tutorial.Revive
+    - stats.tutorial.echo_location
+    - stats.tutorial.Glide
+    - stats.tutorial.Melee
+    - stats.tutorial.activity_safehouse_discovery
+    - stats.tutorial.activity_safehouse_capture
+    - stats.tutorial.sdu_tokens
+  crosshair_settings: 
+    crosshair_friendly_color: 
+    - 0.226316
+    - 0.938686
+    - 0.461698
+    - 1.0
+    crosshair_enemy_color: 
+    - 1.0
+    - 0.142361
+    - 0.167265
+    - 1.0
+    crosshair_neutral_color: 
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+onlineprefs: 
+  crossplaypref: 1
+  networktypepref: 2
+  networkprivacypref: 1
+  friendsyncpref: true
+  favoritefriends: 
+  hide_nat_dialog: false
+  hide_age_dialog: false
+  pushtotalkpref: true
+  voiceenabledpref: true
+  textchatenabledpref: true
+  incomingvoicevolume: 1.0
+  profanityfilterpref: true
+  streamer_mode_local_pref: false
+  streamer_mode_remote_pref: false
+  hide_promotional_content_pref: false
+  matchmakingautoregionselectpref: true
+  matchmakingregionspref: 
+  favoritefriendsnotifications: true
+  charactermemory: 
+  hide_character_memory_dialog: false
+  enable_automatic_character_switching: 
+domains: 
+  local: 
+    characters_selected: C_1
+    characters: 
+      default: 
+      c_1: 
+    shared: 
+      inventory: 
+        items: 
+          bank: 
+      last_weekly_reset: 604800
+      blackmarket_items: 
+      - blackmarket_itemtype: TOR_HW
+        blackmarket_itemcomp: TOR_HW.comp_05_legendary_ravenfire
+        blackmarket_gamestage: 30
+      - blackmarket_itemtype: JAK_SR
+        blackmarket_itemcomp: JAK_SR.comp_05_legendary_ballista
+        blackmarket_gamestage: 30
+      blackmarket_usedpools: 
+      - 10240
+      - 0
+      - 0
+      blackmarket_trackerstate: false
+    unlockables: 
+      shared_progress: 
+        entries: 
+        - shared_progress.prologue_completed
+echoprefs: 
+  path_visibility_duration: 1
+ui_screen_data: 
+  last_visited_status_menu_id: inventory
+audioprefs: 
+  volume_overall: 0.8
+  volume_sfx: 1.0
+  volume_music: 1.0
+  volume_dialog: 1.0
+  playinbackground: false
+  mutehitnotifies: false
+  claptrap_volume: 1.0
+  ui_trim: 0.0
+  player_weapons_trim: 0.0
+  explosions_trim: 0.0
+  outgoing_damage_trim: 0.0
+  incoming_damage_trim: 0.0
+  combat_voice_volume: 1.0
+  player_voice_volume: 1.0
+  player_efforts_trim: 0.0
+  player_callouts_trim: 0.0
+  player_idle_lines_trim: 0.0
+  menu_music_volume: 1.0
+  game_music_volume: 1.0
+  cinematic_music_volume: 1.0
+  boss_music_trim: 0.0
+  audio_preset: 0
+  force_mono: false
+  use_controller_speaker: false
+  eq_mode: 0
+  audio_language: English(US)
+pips: 
+deep_freeze_pips: 
+oak.ui.news_data: 
+  news_data: 
+    latest_popup_article: '-1'
+save_game_header: 
+  guid: 9E024AE7D47642BF95AAE66419D4B7AD
+  timestamp: 1757613628

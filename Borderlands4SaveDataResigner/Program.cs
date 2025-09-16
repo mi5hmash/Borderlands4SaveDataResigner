@@ -244,8 +244,8 @@ void ResignAll()
             logger.LogError($"Failed to decrypt the [{fileName}] file: {e}", group);
             return; // Skip to the next file
         }
-        // Update GUIDs in the decrypted data
-        var decryptedDataWithUpdatedGuids = Bl4Deencryptor.UpdateGuids(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
+        // Anonymize the decrypted data
+        var decryptedDataWithUpdatedGuids = Bl4Deencryptor.AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
         // Encrypt the updated data with the new user's private key
         logger.LogInfo($"Encrypting [{fileName}] file...", group);
         privateKey = Bl4Deencryptor.CalculatePrivateKey(userIdOutput);

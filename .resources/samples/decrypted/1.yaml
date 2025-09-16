@@ -1,0 +1,477 @@
+state: 
+  char_guid: FF32F2D4C9E74DE883682F71B972B511
+  class: Char_DarkSiren
+  char_name: Vex
+  player_difficulty: Normal
+  experience: 
+  - type: Character
+    level: 5
+    points: 6018
+  - type: Specialization
+    level: 1
+    points: 0
+  inventory: 
+    items: 
+      backpack: 
+        slot_0: 
+          serial: '@UgbV{rFoOv5^?*X73bm+5okMjh59$`G90C'
+          state_flags: 1
+        slot_1: 
+          serial: '@Uge9B?m/zGIX66PZs#5Kv(IHS/3jh'
+          flags: 1
+          state_flags: 1
+        slot_2: 
+          serial: '@Uge8Rrm/zGIrrQQ3>QU#TxhB-akH7)'
+          flags: 1
+          state_flags: 1
+        slot_3: 
+          serial: '@UgdhV<FoXybw}L{W3bm+2J*ppS3@Q$47AhQSCjt'
+          flags: 1
+          state_flags: 1
+        slot_4: 
+          serial: '@UgwSAs35F11rX/p5R6o?A61AvDokewO4{8_c94a0H'
+          state_flags: 1
+        slot_5: 
+          serial: '@UgwSAs31$#sV0}<&R6o?B5*4YpsJ5t0<w1o)jY8!@okPV#00'
+          flags: 1
+          state_flags: 1
+        slot_6: 
+          serial: '@Ugr$Q9m/zGIhDHZ1>QL*W;USm+'
+          flags: 1
+          state_flags: 1
+    equipped_inventory: 
+      equipped: 
+        slot_4: 
+        - serial: '@Uge9B?m/zGIX66PZs#5Kv(IHS/3jh'
+          flags: 1
+          state_flags: 1
+        slot_6: 
+        - serial: '@Uge8Rrm/zGIrrQQ3>QU#TxhB-akH7)'
+          flags: 1
+          state_flags: 1
+        slot_1: 
+        - serial: '@UgdhV<FoXybw}L{W3bm+2J*ppS3@Q$47AhQSCjt'
+          flags: 1
+          state_flags: 1
+        slot_0: 
+        - serial: '@UgwSAs31$#sV0}<&R6o?B5*4YpsJ5t0<w1o)jY8!@okPV#00'
+          flags: 1
+          state_flags: 1
+        slot_5: 
+        - serial: '@Ugr$Q9m/zGIhDHZ1>QL*W;USm+'
+          flags: 1
+          state_flags: 1
+    equip_slots_unlocked: 
+    - 2
+    - 6
+    active_slot: 0
+  player_customization: 
+  blackmarket_cooldown: 0
+  challenge_objectives: 
+  total_playtime: 3199.614258
+  last_played_timestamp: 1757613628
+  first_timestamp: 
+  unique_rewards: 
+  - pgraph.sdu_upgrades.RepKit_Slot
+  - Reward_HoverDrive_Daedalus_01
+  - pgraph.sdu_upgrades.Weapon_Slot_03
+  packages: 
+  - time_received: 1757611184
+    game_stage: 2
+    reward_scale: 1.0
+    rewards_def: Reward_PrisonPrologue
+    source: Mission_Main_PrisonPrologue
+    viewed: false
+    contents: 
+    - rewards_data_index: 0
+      serial_numbers: 
+      - '@Uga`vnFoFo<_k%*C3bm+6g+z7g4(b*vC+Zvm'
+  - time_received: 1757613252
+    game_stage: 4
+    reward_scale: 1.0
+    rewards_def: Reward_ItemPool_Grasslands_Beach
+    source: Mission_Main_Beach
+    viewed: false
+    contents: 
+    - rewards_data_index: 0
+      serial_numbers: 
+      - '@Uge9B?m/zGIrcwkQs#5K%1B%}R00'
+  - time_received: 1757613610
+    game_stage: '-1'
+    reward_scale: 1.0
+    rewards_def: RewardPackage_Headhunter
+    source: None
+    viewed: false
+  - time_received: 1757613610
+    game_stage: '-1'
+    reward_scale: 1.0
+    rewards_def: RewardPackage_Premium
+    source: None
+    viewed: false
+  currencies: 
+    cash: 29749
+    eridium: 51
+  ammo: 
+    assaultrifle: 280
+    pistol: 200
+    shotgun: 80
+    smg: 360
+    sniper: 50
+    repairkit: 10
+  checkpoint_name: World_P.FT_GRA_BeachTower
+  world_region_name: KairosGeneric
+  personal_vehicle: None
+  hover_drive: HoverDrive_Daedalus_01
+  vehicle_weapon_slot: 0
+  lostloot: 
+    cooldown: '-1'
+    items: 
+    - serial: '@Ugr$ZCm/zAGMp^+4>QU#b4FC'
+      in_machine: false
+    - serial: '@Uge9B?m/z4E2L1&NsuB'
+      in_machine: false
+    - serial: '@Uge9B?m/z4E=JNp!suB'
+      in_machine: false
+    - serial: '@Ugr$ZCm/zAG#=`{->QU#54FC'
+      in_machine: false
+    - serial: '@Uge9B?m/zAGW@Z5msuB'
+      in_machine: false
+    - serial: '@Ugr$oHm/zAGrt1P7st^'
+      in_machine: false
+    - serial: '@Ugr$ZCm/zAGChi3d>QU#L4FC'
+      in_machine: false
+    - serial: '@Uge9B?m/zAGW@Z5msuB'
+      in_machine: false
+    - serial: '@Uga`vnFoOtl`-1+W3e~6~Ly<a(+SD9WEmS#FIs^'
+      in_machine: false
+    - serial: '@Ugr$ZCm/zAG#=`{->QU#54FC'
+      in_machine: true
+    - serial: '@Uge9B?m/z4E2L1&NsuB'
+      in_machine: false
+    - serial: '@Ugr$ZCm/zAGChi3d>QU#L4FC'
+      in_machine: true
+    - serial: '@Ugr$ZCm/zAGMp^+4>QU#b4FC'
+      in_machine: false
+    - serial: '@UgbV{rFoOuw>4N^E3KgkN%/YEll/uj'
+      in_machine: false
+    - serial: '@UgbV{rFoOuwr-S~Y3Kgk$s7>WT%/f+A00'
+      in_machine: false
+    - serial: '@Uga`vnFoOtl`-1+W3e~6~Ly<a(+SD9WEmS#FIs^'
+      in_machine: true
+    - serial: '@Uga`vnFoXy*F@pZ03Kgl6s7=*D)k5V&okIW'
+      in_machine: false
+    - serial: '@Ugb)KvFoX!hrGx&W3KgkNy+O@Fg+l-'
+      in_machine: false
+    - serial: '@UgbV{rFoXyrp@ROR3KgkM?Lo~#jY9w'
+      in_machine: false
+    - serial: '@Ugd_t@FoXzmC4>H=3Kgk-sJy5<s9LC$2m'
+      in_machine: true
+    - serial: '@UgwSAs31$#sY)w#TR6o?B4i%}is7=*D?LwtP#X/r'
+      in_machine: true
+    - serial: '@UgeU_{FoOt#;ebM;3e~7Z4IPS9NYofq98?}uEYvU5&;S'
+      in_machine: false
+    - serial: '@Uge9B?m/zGI#`Xsls#5Kv!68=w'
+      in_machine: false
+    - serial: '@Uge8aum/zGIM%o1(YEbK=xgnhZ'
+      in_machine: true
+onlinecharacterprefs: 
+  recentfriends: 
+pips: 
+  pips_list: !tags
+  - Character.missions.Mission_Main_PrisonPrologue
+  - Character.skills.points
+  - Character.Replay.Mission_Main_PrisonPrologue
+  - Character.missions.Mission_Main_Beach
+  - Character.vehiclecustomization.HoverDrive.Borg
+  - Character.vehiclecustomization.HoverDrive.Daedalus
+  - Character.vehiclecustomization.HoverDrive.Jakobs
+  - Character.vehiclecustomization.HoverDrive.Maliwan
+  - Character.vehiclecustomization.HoverDrive.order
+  - Character.vehiclecustomization.HoverDrive.Tediore
+  - Character.vehiclecustomization.HoverDrive.Torgue
+  - Character.vehiclecustomization.HoverDrive.Vladof
+  - Character.Echo.points
+  - Character.inventory.rewards.Reward_ItemPool_Grasslands_Beach
+  - Character.Replay.Mission_Main_Beach
+  - Character.missions.Mission_Main_Grasslands1
+  - Character.Contract.Contract_Patrol_Beast_83
+  - Character.inventory.rewards.RewardPackage_Headhunter
+  - Character.inventory.rewards.RewardPackage_Premium
+globals: 
+  time_of_day: Day
+  introlights1: TRUE
+  introlights2: TRUE
+  introlights3: TRUE
+  introlights4: TRUE
+  movegrant_glide: TRUE
+  movegrant_grapplegrabber: TRUE
+  movegrant_grapplegrabber_presentation: TRUE
+  repkit_unlocked: TRUE
+  lockdownlifted: TRUE
+  movegrant_echolocation: TRUE
+  prologue_completed: TRUE
+timed_facts: 
+- World_P.top.base.LootableObject_stat_1164131786.Open TRUE FALSE 352.75 object
+- World_P.top.base.LootableObject_dyn_251065609.Open TRUE FALSE 1183.85 object
+- World_P.stamp_sc_dynamicevents_gra_global_loot7.base.LootableObject_stat_1806420647.Open TRUE FALSE 34.42 object
+stats: 
+  achievements: 
+    14_discovery_grasslands: 3
+  challenge: 
+    kills_all: 108
+    general_kill_enemies: 104
+    general_kill_badass: 3
+    general_kill_crit: 25
+    general_kill_melee: 1
+    general_kill_airborne: 8
+    smg_kill: 29
+    smg_hit_crit: 53
+    smg_kill_crit: 9
+    smg_kill_secondwind: 1
+    pistol_kill: 72
+    pistol_hit_crit: 96
+    pistol_kill_crit: 17
+    pistol_kill_scoped: 37
+    pistol_kill_gliding: 5
+    pistol_kill_secondwind: 2
+    killenemy_grenade: 1
+    shield_take_damage: 3157
+    repkit_uses: 11
+    repkit_healself: 815
+    loot_whites: 9
+    loot_greens: 13
+    loot_blues: 3
+    loot_purples: 5
+    loot_weapons: 19
+    loot_gadgets: 3
+    loot_shields: 5
+    loot_repkits: 3
+    loot_redchest: 1
+    loot_anylootable: 106
+    killenemyarmy_bandits: 31
+    killenemyarmy_creatures: 34
+    killenemyarmy_order: 39
+    killenemytype_psycho: 7
+    killenemytype_guntoter: 18
+    killenemytype_splice: 4
+    killenemytype_bat: 3
+    killenemytype_cat: 31
+    killenemytype_soldier: 30
+    killenemytype_striker: 5
+    killenemytype_drone: 3
+    killenemytype_leader: 1
+    revivepartner: 1
+    secondwind: 4
+    secondwindbadassboss: 1
+    getcash: 498
+    kill_elemental_shock: 1
+    manufacturer_daedalus_multiloader_assault: 13
+    manufacturer_daedalus_multiloader_smg: 21
+    manufacturer_daedalus_kills: 82
+    manufacturer_jakobs_oneshot: 1
+    manufacturer_jakobs_quickdraw: 11
+    manufacturer_jakobs_kills: 19
+    manufacturer_maliwan_kills: 1
+    manufacturer_daedalus_loyalty: 83
+    manufacturer_jakobs_loyalty: 19
+    manufacturer_maliwan_loyalty: 1
+    siren_levelup: 5
+    economy_sellloot: 12
+  openworld: 
+    activities: 
+      safehouses: 
+        safehouse_grasslands_1: 1
+  tutorial: 
+    climb: 1
+    crouch: 1
+    double_jump: 1
+    grapple: 1
+    jump: 1
+    look: 1
+    revive: 1
+    shield: 1
+    walk: 1
+    weapon_fire: 1
+    weapon_reload: 1
+    checkpoints: 1
+    echo_location: 1
+    activity_safehouse_discovery: 1
+    activity_safehouse_capture: 1
+    sdu_tokens: 1
+    actionskill_unlock: 1
+    repkit: 1
+    glide: 1
+    melee: 1
+  regions: 
+    grasslands_regiona: 
+      discovered: 1
+      region_kills: 50
+gbx_discovery_pc: 
+  pins_state: 
+  saveid: 175
+  fodsaveversion: 2
+  foddatas: 
+  - levelname: Intro_P
+    foddimensionx: 128
+    foddimensiony: 128
+    compressiontype: Zlib
+    foddata: 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
+  - levelname: World_P
+    foddimensionx: 128
+    foddimensiony: 128
+    compressiontype: Zlib
+    foddata: eJzt0r8KQVEAgPFjILEpJoOBQQYLL2DyAv5luLcMlDIoRkpRJmW0+jMZPITFpOguMhhtivGqQ3fgPsE5yfd7gW/5hAAAAAAAAAAAAAAAAAAAAAAAAAAA4MdkyrVqWl++OD9erFkuGQpHdOSzC/n2WC0n02kzpb5fseTHaZxQ3jfO37606sr75sHVl+Og4rx/6M7bA5/ivnfwdPWPpuK8EKWdc56TP4zU/xft7+3bpjFcX+/bdlx5XoiY0evmRSDX6hTCGvJvHj1Z4E+8AIDWa64=
+  mapviewsavedata: 
+    hiddenfilters: 
+  metrics: 
+    lastworld: World_P
+    lastregion: grasslands_RegionA
+    hasseenworldlist: 
+    - Intro_P
+    - World_P
+    hasseenregionlist: 
+    - grasslands_Prison
+    - grasslands_RegionA
+gbx_discovery_pg: 
+  dlblob: 'DLMD_Intro_P_IO_VendingMachine_ResupplyStation_UAID_94F6D6F414DEB85B02_1588122976:2:DLMD_Intro_P_LevelTravelStation_UAID_02504100000136FB01_1371254719:2:DLMD_World_P_CarryableObjectContainer_UAID_08BFB89AE7C85D2802_1684482113:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_047C1619B44AA00302_1861225831:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_089204DCF7EF290002_1402034712:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_089204DCF7EF2B0002_1667303070:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_089204DCF7EF2D0002_1947412430:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_089204DCF7EF54FE01_1960602211:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_089204DCF7EFAD0F02_1616494078:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_089204DCF7EFC61D02_2081124994:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_08BFB89AE7C8082402_2027277924:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_08BFB89AE7C87C2302_1968194374:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_244BFE96422DF40F02_1726095288:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_5811224CB628B30F02_1893911891:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_5811224CB628B30F02_1955619892:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_D843AE5FAC6A091E02_1526421768:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_D843AE5FAC6ABC2302_1462881555:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_E04F43E63017481F02_1231511914:2:DLMD_World_P_IO_LostCapsule_DecryptStation_UAID_E04F43E6DF41E21A02_1097913731:2:DLMD_World_P_IO_PointOfInterest_UAID_025041000001256002_1337117384:2:DLMD_World_P_PoAActor_UAID_047C1619B44AA00302_1687647825:2:DLMD_World_P_IO_PointOfInterest_UAID_025041000001882102_2079195280:1:DLMD_World_P_IO_PointOfInterest_UAID_0250410000013C2202_1958193976:2:DLMD_World_P_IO_PointOfInterest_UAID_025041000001266002_1228412562:1:DLMD_World_P_OakInteractiveObject_UAID_E04F43E60D83840102_1427834786:2:DLMD_World_P_IO_VendingMachine_ResupplyStation_UAID_2CF05D8C2CE92C3802_1813796376:2:'
+activities: 
+  allactivities: 
+  - serial: 'act,5,ContractActivity_Patrol_Beast,Contract_Patrol_Beast,registry.World_P.top.base.ContractRequester_GRA_Coastal.__nochannel,0,adrs[registry.World_P.stamp_contractposter_gra_coastal_3.base.contract_activityarea.__nochannel,registry.World_P.top.base.stamp_contractposter_gra_coastal_3.SL_Contract_Poster_Spawner],mas[GeneratedMission_RequestOwner,31,registry.World_P.top.base.ContractRequester_GRA_Coastal.__nochannel,MissionGiver_NameTag,29,GRASSLANDS_DJ_CB|GbxDialogNameTagDef,CharacterSignoff,29,CString_Signoff_DJ_Grass_2|GbxUIDisplayDataDef_LocalizedText,Description,29,CDescription_Patrol_GrasslandsDJ_Creature|GbxUIDisplayDataDef_LocalizedText,Color_Index,18,Grass_DJ,Area,31,registry.World_P.stamp_contractposter_gra_coastal_3.base.contract_activityarea.__nochannel,Stamp,31,registry.World_P.top.base.stamp_contractposter_gra_coastal_3.SL_Contract_Poster_Spawner,Spawner,31,registry.World_P.stamp_contractposter_gra_coastal_3.base.contract_spawner.__nochannel,WP_EntryPoint_1_Contract_Patrol_Beast,31,waypoints.li_contractposter_spawner_top_base_contract_spawner_wp_0,Currency_Package,29,ContractReward_Currency_Patrol|GbxRewardsDef,Reward_Package,29,ContractReward_Patrol_NonWeapon|GbxRewardsDef,target_zone,29,World_P.Zone_Grasslands|GbxLevelZoneDef]'
+    missionstate: 
+      tracked_index: 2
+      sel_int_choices: 
+        missiongiver: Grasslands_DJ
+        currency rewards: Normal
+        mission rewards: nongun
+      status: Active
+      objectives: 
+        kill_patrol_target: 
+          status: Active
+  - serial: 'act,5,ContractActivities_Search_Bandit,Contract_Search_Bandit,registry.World_P.top.base.ContractRequester_GRA_Coastal.__nochannel,0,adrs[registry.World_P.stamp_contractposter_gra_coastal_5.base.contract_activityarea.__nochannel,registry.World_P.top.base.stamp_contractposter_gra_coastal_5.SL_Contract_Poster_Spawner,registry.World_P.top.base.contract_beacon_activityarea_cluster_c.__nochannel],mas[GeneratedMission_RequestOwner,31,registry.World_P.top.base.ContractRequester_GRA_Coastal.__nochannel,Area,31,registry.World_P.stamp_contractposter_gra_coastal_5.base.contract_activityarea.__nochannel,Stamp,31,registry.World_P.top.base.stamp_contractposter_gra_coastal_5.SL_Contract_Poster_Spawner,Spawner,31,registry.World_P.stamp_contractposter_gra_coastal_5.base.contract_spawner.__nochannel,WP_EntryPoint_1_Contract_Search_Bandit,31,waypoints.li_contractposter_spawner_top_base_contract_spawner_wp_0,Area,31,registry.World_P.top.base.contract_beacon_activityarea_cluster_c.__nochannel,Search_Key,31,registry.World_P.top.base.contract_searchdestination_gra_c1_bandit.__nochannel,WP_NewObjective_Contract_Search_Bandit,31,waypoints.world_p_top_base_contract_searchdestination_gra_c1_bandit_wp,activation_center,31,registry.World_P.top.base.contract_searchclusterwaypoint_gra_c.__nochannel,WP_Add_NewObjective_1_Contract_Search_Bandit,31,waypoints.world_p_top_base_contract_searchclusterwaypoint_gra_c_wp,MissionGiver_NameTag,29,CLAPTRAP_CB|GbxDialogNameTagDef,CharacterSignoff,29,CString_Signoff_Claptrap_5|GbxUIDisplayDataDef_LocalizedText,Description,29,CDescription_Search_Claptrap_Bandit|GbxUIDisplayDataDef_LocalizedText,Color_Index,18,CLAPTRAP,Currency_Package,29,ContractReward_Currency_Search|GbxRewardsDef,Reward_Package,29,ContractReward_Search_NonWeapon|GbxRewardsDef,target_zone,29,World_P.Zone_Grasslands|GbxLevelZoneDef,target_region,29,grasslands_RegionA|GbxWorldRegionDef]'
+    missionstate: 
+      sel_int_choices: 
+        missiongiver: CLAPTRAP
+        currency rewards: Normal
+        mission rewards: nongun
+      status: Active
+      objectives: 
+        newobjective: 
+          status: Active
+  - serial: 'act,5,ContractActivities_Search_Creature,Contract_Search_Creature,registry.World_P.top.base.ContractRequester_GRA_Coastal.__nochannel,0,adrs[registry.World_P.stamp_contractposter_gra_coastal_2.base.contract_activityarea.__nochannel,registry.World_P.top.base.stamp_contractposter_gra_coastal_2.SL_Contract_Poster_Spawner,registry.World_P.top.base.contract_beacon_activityarea_cluster_a.__nochannel],mas[GeneratedMission_RequestOwner,31,registry.World_P.top.base.ContractRequester_GRA_Coastal.__nochannel,Area,31,registry.World_P.stamp_contractposter_gra_coastal_2.base.contract_activityarea.__nochannel,Stamp,31,registry.World_P.top.base.stamp_contractposter_gra_coastal_2.SL_Contract_Poster_Spawner,Spawner,31,registry.World_P.stamp_contractposter_gra_coastal_2.base.contract_spawner.__nochannel,WP_EntryPoint_1_Contract_Search_Creature,31,waypoints.li_contractposter_spawner_top_base_contract_spawner_wp_0,Area,31,registry.World_P.top.base.contract_beacon_activityarea_cluster_a.__nochannel,Search_Key,31,registry.World_P.top.base.contract_searchdestination_gra_a1_creature.__nochannel,WP_NewObjective_Contract_Search_Creature,31,waypoints.world_p_top_base_contract_searchdestination_gra_a1_creature_wp,activation_center,31,registry.World_P.top.base.contract_searchclusterwaypoint_gra_a.__nochannel,WP_Add_NewObjective_1_Contract_Search_Creature,31,waypoints.world_p_top_base_contract_searchclusterwaypoint_gra_a_wp,MissionGiver_NameTag,29,CLAPTRAP_CB|GbxDialogNameTagDef,CharacterSignoff,29,CString_Signoff_Claptrap_5|GbxUIDisplayDataDef_LocalizedText,Description,29,CDescription_Search_Claptrap_Creature|GbxUIDisplayDataDef_LocalizedText,Color_Index,18,CLAPTRAP,Currency_Package,29,ContractReward_Currency_Search|GbxRewardsDef,Reward_Package,29,ContractReward_Search_NonWeapon|GbxRewardsDef,target_zone,29,World_P.Zone_Grasslands|GbxLevelZoneDef,target_region,29,grasslands_RegionA|GbxWorldRegionDef]'
+    missionstate: 
+      sel_int_choices: 
+        missiongiver: CLAPTRAP
+        currency rewards: Normal
+        mission rewards: nongun
+      status: Active
+      objectives: 
+        newobjective: 
+          status: Active
+missions: 
+  tracked_missions: 
+  - Mission_Main_Grasslands1
+  - none
+  - none
+  local_sets: 
+    missionset_main_prisonprologue: 
+      status: completed
+      missions: 
+        mission_main_prisonprologue: 
+          status: completed
+          final: 
+            possessionscene_endstate: completed
+            obj_followarjay_walkntalk_endstate: completed
+            obj_firstswim_endstate: completed
+            inv_gettocrouch_endstate: completed
+            inv_afterprisonexit_endstate: completed
+            inv_beforeprisonexit_endstate: completed
+            inv_firstdropdown_endstate: completed
+    missionset_zoneactivity_safehouse: 
+      missions: 
+        zoneactivity_grasslands_safehousemain: 
+          status: completed
+          final: 
+            fact_lightson: TRUE
+            find_the_datapad_endstate: completed
+            claim_the_command_console_endstate: completed
+    missionset_main_beach: 
+      status: completed
+      missions: 
+        mission_main_beach: 
+          status: completed
+          final: 
+            melee_the_door_0_endstate: completed
+            reach_village_endstate: completed
+            use_glide_to_reach_exit_endstate: completed
+            destroy_bolt_1_endstate: deactivated
+            destroy_bolt_3_endstate: deactivated
+            destroy_bolt_2_endstate: completed
+            activate__cl4ptps_safehouse_endstate: completed
+    missionset_main_grasslands1: 
+      missions: 
+        mission_main_grasslands1: 
+          status: Active
+          objectives: 
+            _trigger_claptrap_final_vo_sub0: 
+              status: Active
+            travel_to_survivlist_hq: 
+              status: Active
+            extravo2: 
+              status: Active
+            _dash_tutorial_sub0: 
+              status: Active
+            _dash_tutorial_sub1: 
+              status: Active
+            _dash_tutorial_sub2: 
+              status: Active
+            trigger_claptrap_final_vo: 
+              status: Active
+            _trigger_claptrap_final_vo_sub1: 
+              status: Active
+            dash_tutorial: 
+              status: Active
+            _nudge_extra_vo_sub0: 
+              status: Active
+            _nudge_extra_vo_sub1: 
+              status: Active
+            _nudge_extra_vo_sub2: 
+              status: Active
+            nudge_extra_vo: 
+              status: Active
+    missionset_side_grasslandsa: 
+      missions: 
+        grasslands_side_murdermystery_beckon: 
+          status: Active
+          objectives: 
+            encounter_outside_: 
+              status: WaitingOnDependencies
+            survivor_calls_for_help: 
+              status: Active
+            encounter_not_complete_dialogue_: 
+              status: WaitingOnDependencies
+oak.ui.progression_data: 
+  ui_progression_data: 
+    active_tree_index: 0
+    dont_ask_again_skills: false
+    dont_ask_again_respec_skills: false
+    dont_ask_again_specializations: false
+    dont_ask_again_respec_specializations: false
+    dont_ask_again_respec_node: false
+save_game_header: 
+  guid: 10FA6731D4314C9A8D46E74E09F7F22E
+  timestamp: 1757613628
+progression: 
+  point_pools: 
+    characterprogresspoints: 4
+    echotokenprogresspoints: 40
+  progress_state_data: 
+    characterprogresspoints: 
+      id: 5CFF37C74C74252412A2DFA06CCF1537
+      reset_count: 0
+    specializationtokenpool: 
+      id: 473A52614042CEEC7CB025B99C8CB405
+      reset_count: 0
+unlockables: 
+  unlockable_hoverdrives: 
+    entries: 
+    - unlockable_hoverdrives.Daedalus_01
