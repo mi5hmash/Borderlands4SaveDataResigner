@@ -7,6 +7,9 @@
 .resources/others/
 .resources/builds/
 
+# Distribution folder
+dist/
+
 # User-specific files
 *.rsuser
 *.suo

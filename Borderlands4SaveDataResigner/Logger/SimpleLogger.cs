@@ -24,7 +24,7 @@ public class SimpleLogger
     /// <summary>
     /// A private lock object used to synchronize access to shared resources.
     /// </summary>
-    private readonly Lock _lockObject = new();
+    private readonly object _lockObject = new();
 
     #region LOG_PROVDERS
 
@@ -39,12 +39,12 @@ public class SimpleLogger
     /// <param name="provider">The log provider to add.</param>
     public void AddProvider(ILogProvider provider)
     {
-        var scope = _lockObject.EnterScope();
-
-        _logProviders.Add(provider);
-        if (provider is FileLogProvider)
-            provider.Log(CreateLogHeader());
-        scope.Dispose();
+        lock (_lockObject)
+        {
+            _logProviders.Add(provider);
+            if (provider is FileLogProvider)
+                provider.Log(CreateLogHeader());
+        }
     }
 
     /// <summary>
@@ -52,11 +52,10 @@ public class SimpleLogger
     /// </summary>
     public void ClearProviders()
     {
-        var scope = _lockObject.EnterScope();
-
-        _logProviders.Clear();
-
-        scope.Dispose();
+        lock (_lockObject)
+        {
+            _logProviders.Clear();
+        }
     }
 
     #endregion
@@ -122,11 +121,10 @@ public class SimpleLogger
             ? new LogEntry(severity, message)
             : new LogEntry(group, severity, message);
 
-        var scope = _lockObject.EnterScope();
-
-        _logProviders.ForEach(provider => provider.Log(entry));
-
-        scope.Dispose();
+        lock (_lockObject)
+        {
+            _logProviders.ForEach(provider => provider.Log(entry));
+        }
     }
 
     /// <summary>
@@ -170,6 +168,15 @@ public class SimpleLogger
         => Log(LogSeverity.Error, message, group);
 
     /// <summary>
+    /// Logs an error-level message with exception details, optionally associating it with a specific group.
+    /// </summary>
+    /// <param name="message">The message to log.</param>
+    /// <param name="exception">The exception to include in the log.</param>
+    /// <param name="group">An optional group identifier to associate with the log entry.</param>
+    public void LogError(string message, Exception exception, string? group = null)
+        => Log(LogSeverity.Error, $"{message}: {exception}", group);
+
+    /// <summary>
     /// Logs a critical-level message, optionally associating it with a specific group.
     /// </summary>
     /// <param name="message">The message to log.</param>
@@ -182,11 +189,10 @@ public class SimpleLogger
     /// </summary>
     public void Flush()
     {
-        var scope = _lockObject.EnterScope();
-
-        _logProviders.ForEach(provider => provider.Flush());
-
-        scope.Dispose();
+        lock (_lockObject)
+        {
+            _logProviders.ForEach(provider => provider.Flush());
+        }
     }
 
     /// <summary>

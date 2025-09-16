@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.vscodeintellicode-csharp",
+        "ms-vscode.powershell",
+        "editorconfig.editorconfig",
+        "formulahendry.dotnet-test-explorer"
+    ]
+}
