@@ -43,6 +43,22 @@ public class EpicId
     }
 
     /// <summary>
+    /// Converts the <see cref="AccountId"/> string to an array of bytes encoded as UTF-16 (little-endian).
+    /// </summary>
+    /// <returns>A byte array containing the UTF-16 encoded representation of the <see cref="AccountId"/> string.</returns>
+    public byte[] GetAsWideString()
+    {
+        var bytes = new byte[AccountId.Length * 2];
+        for (var i = 0; i < AccountId.Length; i++)
+        {
+            var charBytes = BitConverter.GetBytes(AccountId[i]);
+            bytes[i * 2] = charBytes[0];
+            bytes[i * 2 + 1] = charBytes[1];
+        }
+        return bytes;
+    }
+
+    /// <summary>
     /// Opens the EGS profile URL in the default web browser.
     /// </summary>
     public void OpenEpicProfileUrl()

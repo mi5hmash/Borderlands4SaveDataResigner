@@ -169,7 +169,7 @@ public static class Bl4Deencryptor
     {
         var epicId = new EpicId();
         var result = epicId.TrySetEpicId(input);
-        if (result) return epicId.GetAsByteArray();
+        if (result) return epicId.GetAsWideStringArray();
         
         var steamId = new SteamId();
         result = steamId.Set(input);
