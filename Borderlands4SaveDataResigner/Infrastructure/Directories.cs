@@ -1,5 +1,7 @@
 ﻿using Borderlands4SaveDataResigner.Helpers;
 
+using System.IO;
+
 namespace Borderlands4SaveDataResigner.Infrastructure;
 
 public class Directories

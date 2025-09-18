@@ -1,0 +1,220 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Debug",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "--configuration",
+                "Debug"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$msCompile",
+            "detail": "Build the project in Debug configuration"
+        },
+        {
+            "label": "Build Release",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "--configuration",
+                "Release"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$msCompile",
+            "detail": "Build the project in Release configuration"
+        },
+        {
+            "label": "Run Application",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "Borderlands4SaveDataResigner"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Run the WPF application",
+            "dependsOn": "Build Debug"
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "clean"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Clean all build outputs"
+        },
+        {
+            "label": "Restore",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "restore"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Restore NuGet packages"
+        },
+        {
+            "label": "Rebuild",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "--no-incremental",
+                "--configuration",
+                "Debug"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$msCompile",
+            "detail": "Clean rebuild of the project",
+            "dependsOn": "Clean"
+        },
+        {
+            "label": "Build Standalone Exe",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "dotnet build --configuration Release; if (Test-Path 'dist') { Remove-Item 'dist' -Recurse -Force }; New-Item -ItemType Directory 'dist' -Force; Copy-Item 'Borderlands4SaveDataResigner/bin/Release/net9.0-windows/Borderlands4SaveDataResigner.exe' 'dist/'; Copy-Item 'Borderlands4SaveDataResigner/bin/Release/net9.0-windows/Borderlands4SaveDataResigner.dll' 'dist/'; Copy-Item 'Borderlands4SaveDataResigner/bin/Release/net9.0-windows/Borderlands4SaveDataResigner.deps.json' 'dist/'; Copy-Item 'Borderlands4SaveDataResigner/bin/Release/net9.0-windows/Borderlands4SaveDataResigner.runtimeconfig.json' 'dist/'; Copy-Item 'Borderlands4SaveDataResigner/bin/Release/net9.0-windows/CsvHelper.dll' 'dist/'; Write-Host 'Standalone executable created in dist/ folder' -ForegroundColor Green"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": "$msCompile",
+            "detail": "Build and create a clean standalone executable with minimal dependencies"
+        },
+        {
+            "label": "Publish Release",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "Borderlands4SaveDataResigner/Borderlands4SaveDataResigner.csproj",
+                "--configuration",
+                "Release",
+                "--self-contained",
+                "true",
+                "--runtime",
+                "win-x64",
+                "--output",
+                "publish"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": "$msCompile",
+            "detail": "Publish the application as a self-contained executable"
+        },
+        {
+            "label": "Watch Build",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "watch",
+                "build",
+                "--project",
+                "Borderlands4SaveDataResigner"
+            ],
+            "group": "build",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "dotnet",
+                "pattern": {
+                    "regexp": "^(.*)\\((\\d+),(\\d+)\\):\\s+(error|warning|info)\\s+(\\w{1,2}\\d+):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "code": 5,
+                    "message": 6
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^dotnet watch",
+                    "endsPattern": "^\\s*Application started\\.|^\\s*dotnet watch : Exited"
+                }
+            },
+            "detail": "Watch for file changes and automatically rebuild"
+        }
+    ]
+}

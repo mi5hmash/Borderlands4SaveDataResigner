@@ -1,10 +1,6 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
+using System.IO;
 using Borderlands4SaveDataResigner.Helpers;
 using Borderlands4SaveDataResigner.Infrastructure;
 using Borderlands4SaveDataResigner.Logger;
@@ -99,7 +95,7 @@ public static class Program
             // Get list of FILES to PROCESS
             arguments.TryGetValue("-p", out var inputRootPath);
             string[] filesToProcess;
-            if (!Directory.Exists(inputRootPath))
+            if (!Directory.Exists(inputRootPath)) 
                 throw new DirectoryNotFoundException($"The provided path '{inputRootPath}' is not a valid directory or does not exist.");
             // Get MODE
             arguments.TryGetValue("-m", out var mode);
@@ -234,8 +230,7 @@ public static class Program
                 if (filesToProcess.Length == 0) return;
                 logger.LogInfo($"Resigning [{filesToProcess.Length}] files...");
                 // Calculate the private key based on the provided user ID
-                var inputPrivateKey = Bl4Deencryptor.CalculatePrivateKey(userIdInput);
-                var outputPrivateKey = Bl4Deencryptor.CalculatePrivateKey(userIdOutput);
+                var privateKey = Bl4Deencryptor.CalculatePrivateKey(userIdInput);
                 // RESIGN
                 // Create a new folder in OUTPUT directory
                 var outputDir = GetNewOutputDirectory(directories.Output, "resigned");
@@ -255,7 +250,7 @@ public static class Program
                     byte[] decryptedData;
                     try
                     {
-                        decryptedData = Bl4Deencryptor.DecryptData(encryptedDataSpan, inputPrivateKey);
+                        decryptedData = Bl4Deencryptor.DecryptData(encryptedDataSpan, privateKey);
                     }
                     catch (Exception e)
                     {
@@ -263,13 +258,14 @@ public static class Program
                         return; // Skip to the next file
                     }
                     // Anonymize the decrypted data
-                    var anonymizedData = Bl4Deencryptor.AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
+                    var decryptedDataWithUpdatedGuids = Bl4Deencryptor.AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
                     // Encrypt the updated data with the new user's private key
                     logger.LogInfo($"Encrypting [{fileName}] file...", group);
+                    privateKey = Bl4Deencryptor.CalculatePrivateKey(userIdOutput);
                     byte[] resignedData;
                     try
                     {
-                        resignedData = Bl4Deencryptor.EncryptData(anonymizedData, outputPrivateKey);
+                        resignedData = Bl4Deencryptor.EncryptData(decryptedDataWithUpdatedGuids, privateKey);
                     }
                     catch (Exception e)
                     {
