@@ -6,6 +6,7 @@
 # Resource directories
 .resources/others/
 .resources/builds/
+.Release/
 
 # User-specific files
 *.rsuser

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="bl4-savedata-resigner-cli/bl4-savedata-resigner-cli.csproj" />
+  <Project Path="Borderlands4SaveDataResignerCore/Borderlands4SaveDataResignerCore.csproj" />
+  <Project Path="Borderlands4SaveDataResignerWpf/Borderlands4SaveDataResignerWpf.csproj" Id="26b94cc4-01d9-4072-97c7-181bb004eee1" />
+  <Project Path="QualityControl.xUnit/QualityControl.xUnit.csproj" Id="3fbb5e50-4a9d-49ba-953b-d92206884861" />
+</Solution>

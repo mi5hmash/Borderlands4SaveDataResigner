@@ -1,7 +1,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blueviolet.svg)](https://opensource.org/license/mit)
 [![Release Version](https://img.shields.io/github/v/tag/mi5hmash/Borderlands4SaveDataResigner?label=Version)](https://github.com/mi5hmash/Borderlands4SaveDataResigner/releases/latest)
-[![Visual Studio 2022](https://custom-icon-badges.demolab.com/badge/Visual%20Studio%202022-5C2D91.svg?&logo=visual-studio&logoColor=white)](https://visualstudio.microsoft.com/)
-[![.NET9](https://img.shields.io/badge/.NET%209-512BD4?logo=dotnet&logoColor=fff)](#)
+[![Visual Studio 2026](https://custom-icon-badges.demolab.com/badge/Visual%20Studio%202026-5C2D91.svg?&logo=visual-studio&logoColor=white)](https://visualstudio.microsoft.com/)
+[![.NET10](https://img.shields.io/badge/.NET%2010-512BD4?logo=dotnet&logoColor=fff)](#)
 
 > [!IMPORTANT]
 > **This software is free and open source. If someone asks you to pay for it, it's likely a scam.**
@@ -46,7 +46,7 @@ You can use the SteamDB calculator at [steamdb.info](https://steamdb.info/calcul
 Resigns all files in the specified directory from one user ID to another.
 ### Usage:
 ```sh
-.\Borderlands4SaveDataResigner.exe -m r -p "FOLDER_PATH" -uI 76561197960265729 -uO 76561197960265730 -v
+.\bl4-savedata-resigner-cli.exe -m r -p "FOLDER_PATH" -uI 76561197960265729 -uO 76561197960265730 -v
 ```
 ### Parameters:
 - `-p` (Required) – Path to the directory containing files to resign.
@@ -58,7 +58,7 @@ Resigns all files in the specified directory from one user ID to another.
 Decrypts all SaveData files in the specified directory.
 ### Usage:
 ```sh
-.\Borderlands4SaveDataResigner.exe -m d -p "FOLDER_PATH" -u 76561197960265729 -v
+.\bl4-savedata-resigner-cli.exe -m d -p "FOLDER_PATH" -u 76561197960265729 -v
 ```
 ### Parameters:
 - `-p` (Required) – Path to the directory containing files to decrypt.
@@ -69,7 +69,7 @@ Decrypts all SaveData files in the specified directory.
 Encrypts all files in the specified directory.
 ### Usage:
 ```sh
-.\Borderlands4SaveDataResigner.exe -m e -p "FOLDER_PATH" -u 76561197960265729 -v
+.\bl4-savedata-resigner-cli.exe -m e -p "FOLDER_PATH" -u 76561197960265729 -v
 ```
 ### Parameters:
 - `-p` (Required) – Path to the directory containing files to encrypt.
