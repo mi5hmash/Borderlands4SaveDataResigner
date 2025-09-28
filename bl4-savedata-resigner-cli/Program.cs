@@ -38,7 +38,7 @@ AppDomain.CurrentDomain.UnhandledException += (_, e) =>
 AppDomain.CurrentDomain.ProcessExit += (_, _) => logger.Flush();
 
 //Initialize ProgressReporter
-var progressReporter = new ProgressReporter(null, null);
+var progressReporter = new ProgressReporter(new Progress<string>(Console.WriteLine), null);
 
 // Initialize CORE
 var core = new Core(logger, progressReporter);
@@ -94,6 +94,9 @@ switch (mode)
     case "resign" or "r":
         ResignAll();
         break;
+    case "bruteforce" or "b":
+        BruteforceSteamId();
+        break;
     default:
         throw new ArgumentException($"Unknown mode: '{mode}'.");
 }
@@ -124,9 +127,10 @@ static void PrintHelp()
                          -m d           Decrypt SaveData files
                          -m e           Encrypt SaveData files
                          -m r           Resign SaveData files
+                         -m b           Bruteforce Steam ID for a SaveData file
 
                        Options:
-                         -p <path>      Path to folder containing SaveData files
+                         -p <path>      Path to folder containing SaveData files or path to a single SaveData file (used in Bruteforce mode)
                          -u <user_id>   User ID (used in decrypt/encrypt modes)
                          -uI <old_id>   Original User ID (used in resign mode)
                          -uO <new_id>   New User ID (used in resign mode)
@@ -137,6 +141,7 @@ static void PrintHelp()
                          Decrypt: {exeName} -m d -p "{inputPath}" -u 76561197960265729
                          Encrypt: {exeName} -m e -p "{inputPath}" -u 76561197960265729
                          Resign : {exeName} -m r -p "{inputPath}" -uI 76561197960265729 -uO 76561197960265730
+                         Bruteforce: {exeName} -m b -p "{Path.Combine(inputPath, "1.sav")}"
                        """;
     Console.WriteLine(helpMessage);
 }
@@ -187,6 +192,16 @@ void ResignAll()
         throw new ArgumentException("Output User ID is missing.");
     var inputRootPath = GetValidatedInputRootPath();
     core.ResignFiles(inputRootPath, userIdInput, userIdOutput, cts);
+    cts.Dispose();
+}
+
+void BruteforceSteamId()
+{
+    var cts = new CancellationTokenSource();
+    arguments.TryGetValue("-p", out var filePath);
+    if (!File.Exists(filePath))
+        throw new FileNotFoundException($"The provided path '{filePath}' is not a valid file or does not exist.");
+    core.BruteforceSteamId(filePath, cts);
     cts.Dispose();
 }
 

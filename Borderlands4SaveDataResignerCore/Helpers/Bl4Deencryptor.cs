@@ -107,11 +107,10 @@ public static partial class Bl4Deencryptor
         if (data.Length < 16) return 0;
         var padLen = data[^1];
         if (padLen is > 16 or < 1) return 0;
-        for (var i = 2; i < padLen; i++)
-        {
-            var result = data[^1] == data[^(padLen - i)];
-            if (!result) return 0;
-        }
+        // Thank you Dxian998 for proposing a cleaner loop.
+        for (var i = 1; i <= padLen; i++)
+            if (data[^i] != padLen) return 0;
+
         return padLen;
     }
 
@@ -197,12 +196,42 @@ public static partial class Bl4Deencryptor
     public static byte[] CalculatePrivateKey(string userId)
     {
         var uid = ParseUserId(userId);
+        return CalculatePrivateKey(uid);
+    }
+    /// <summary>
+    /// Calculates a private key based on the provided user ID.
+    /// </summary>
+    /// <param name="userId">A read-only span of bytes representing the user identifier to be combined with the public key.</param>
+    /// <returns>A byte array representing the calculated private key.</returns>
+    public static byte[] CalculatePrivateKey(ReadOnlySpan<byte> userId)
+    {
         Span<byte> keyContainer = stackalloc byte[PublicKey.Length];
-        var length = Math.Min(uid.Length, keyContainer.Length);
+        var length = Math.Min(userId.Length, keyContainer.Length);
         PublicKey.CopyTo(keyContainer);
         for (var i = 0; i < length; i++)
-            keyContainer[i] = (byte)(keyContainer[i] ^ uid[i]);
+            keyContainer[i] = (byte)(keyContainer[i] ^ userId[i]);
         return keyContainer.ToArray();
+    }
+
+    /// <summary>
+    /// Attempts to determine whether the specified Steam ID can successfully decrypt the provided encrypted data using a brute-force approach.
+    /// </summary>
+    /// <param name="encryptedData">A read-only span of bytes containing the encrypted data to test for decryption.</param>
+    /// <param name="steamId">The Steam ID to use when calculating the decryption key.</param>
+    /// <returns>true if the encrypted data can be decrypted with the key derived from the specified Steam ID; otherwise, false.</returns>
+    public static bool BruteforceSteamId(ReadOnlySpan<byte> encryptedData, ulong steamId)
+    {
+        // Calculate the private key using the Steam ID
+        var steamIdAsBytes = BitConverter.GetBytes(steamId);
+        var privateKey = CalculatePrivateKey(steamIdAsBytes);
+        // Decrypt the data using AES in ECB mode
+        var decryptedData = DecryptEcb(encryptedData[..16], privateKey);
+        // Check if the decrypted data starts with the expected Zlib header (0x78, 0x9C)
+        if (decryptedData[0] is not 0x78 || decryptedData[1] is not 0x9C) return false;
+        // Try to fully decrypt the data to ensure it's valid
+        try { _ = DecryptData(encryptedData, privateKey); }
+        catch { return false; }
+        return true;
     }
 
     /// <summary>

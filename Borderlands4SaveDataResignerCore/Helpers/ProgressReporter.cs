@@ -1,9 +1,22 @@
 ﻿namespace Borderlands4SaveDataResignerCore.Helpers;
 
+/// <summary>
+/// Provides a mechanism for reporting progress updates as text messages and integer values to external handlers.
+/// </summary>
+/// <param name="text">An optional progress handler that receives status text updates. If null, no text progress will be reported.</param>
+/// <param name="value">An optional progress handler that receives progress notifications as integer values. If null, progress updates are not reported externally.</param>
 public class ProgressReporter(IProgress<string>? text = null, IProgress<int>? value = null)
 {
+    /// <summary>
+    /// Initializes a new instance of the ProgressReporter class with an optional text progress handler.
+    /// </summary>
+    /// <param name="text">An optional progress handler that receives status text updates. If null, no text progress will be reported.</param>
     public ProgressReporter(IProgress<string>? text = null) : this(text, null) {}
 
+    /// <summary>
+    /// Initializes a new instance of the ProgressReporter class with an optional progress value handler.
+    /// </summary>
+    /// <param name="value">An optional progress handler that receives progress notifications as integer values. If null, progress updates are not reported externally.</param>
     public ProgressReporter(IProgress<int>? value = null) : this(null, value) {}
 
     /// <summary>

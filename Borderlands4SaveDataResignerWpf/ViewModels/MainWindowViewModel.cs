@@ -214,6 +214,21 @@ public partial class MainWindowViewModel : ObservableObject
         _cts.Dispose();
     }
 
+    [RelayCommand]
+    private async Task BruteforceSteamId()
+    {
+        if (IsBusy) return;
+        IsBusy = true;
+        IsAbortAllowed = true;
+        _cts = new CancellationTokenSource();
+        var result = await _core.BruteforceSteamIdAsync(InputFolderPath, _cts);
+        if (result != null) UserIdInput = result.ToString() ?? string.Empty;
+        SystemSounds.Beep.Play();
+        _cts.Dispose();
+        IsAbortAllowed = false;
+        IsBusy = false;
+    }
+
 #if DEBUG
     [RelayCommand]
     private async Task Test()

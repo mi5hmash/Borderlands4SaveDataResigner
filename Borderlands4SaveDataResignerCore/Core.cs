@@ -118,8 +118,7 @@ public class Core
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(
-                        $"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
+                    _logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
                 }
                 finally
                 {
@@ -205,5 +204,53 @@ public class Core
         {
             _logger.LogWarning(e.Message);
         }
+    }
+
+    public async Task<ulong?> BruteforceSteamIdAsync(string inputFile, CancellationTokenSource cts)
+        => await Task.Run(() => BruteforceSteamId(inputFile, cts));
+
+    public ulong? BruteforceSteamId(string inputPath, CancellationTokenSource cts)
+    {
+        ulong? result = null;
+        try
+        {
+            string fileToProcess;
+            if (File.Exists(inputPath))
+                fileToProcess = inputPath;
+            else
+            {
+                if (!Directory.Exists(inputPath))
+                    throw new DirectoryNotFoundException($"The provided path '{inputPath}' is not a valid file or directory.");
+                var filesToProcess = Directory.GetFiles(inputPath, $"*{Bl4Deencryptor.SaveFileExtension}", SearchOption.TopDirectoryOnly);
+                if (filesToProcess.Length == 0)
+                    throw new FileNotFoundException($"No '{Bl4Deencryptor.SaveFileExtension}' files found in the provided directory '{inputPath}'.");
+                fileToProcess = filesToProcess.FirstOrDefault() ?? string.Empty;
+            }
+            var fileName = Path.GetFileName(fileToProcess);
+            _logger.LogInfo("Brute-forcing SteamID...");
+            // Setup parallel options
+            var po = GetParallelOptions(cts);
+            uint lap = 0;
+            var inputDataSpan = File.ReadAllBytes(fileToProcess);
+            const ulong universeBase = 76561197960265729;
+            Parallel.For(0, uint.MaxValue, po, (ctr, state) =>
+            {
+                var currentSteamId = universeBase + (ulong)ctr;
+                if (lap % 10_000_000 == 0)
+                {
+                    var progress = (double)lap / uint.MaxValue;
+                    _progressReporter.Report($"[{progress:P2}] Brute-forcing: {fileName}", (int)(progress * 100));
+                }
+                if (Bl4Deencryptor.BruteforceSteamId(inputDataSpan, currentSteamId))
+                {
+                    result = currentSteamId;
+                    state.Stop();
+                }
+                Interlocked.Increment(ref lap);
+            });
+            _logger.LogInfo(result is null ? "SteamID not found." : $"Found SteamID: {result}.");
+        }
+        catch (Exception e) { _logger.LogWarning(e.Message); }
+        return result;
     }
 }

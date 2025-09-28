@@ -44,11 +44,11 @@
                         </Grid.ColumnDefinitions>
                         <TextBox FontSize="13" Text="{Binding ViewModel.InputFolderPath, UpdateSourceTrigger=LostFocus, Mode=TwoWay}" />
                         <Button
-                        Grid.Column="1"
-                        Margin="10,0,0,0"
-                        Command="{Binding ViewModel.SelectInputFolderPathCommand}"
-                        Content="📁"
-                        ToolTip="Open the File Selector" />
+                            Grid.Column="1"
+                            Margin="10,0,0,0"
+                            Command="{Binding ViewModel.SelectInputFolderPathCommand}"
+                            Content="📁"
+                            ToolTip="Open the File Selector" />
                     </Grid>
                 </StackPanel>
                 <!--  UserId  -->
@@ -60,12 +60,22 @@
                     </Grid.ColumnDefinitions>
                     <!--  Left  -->
                     <StackPanel>
-                        <TextBlock Margin="0,0,0,5">
-                        <Run Text="User ID" />
-                        <Bold>
-                            <Run Text="(INPUT)" />
-                        </Bold>
-                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="0,0,0,5">
+                                <Run Text="User ID" />
+                                <Bold>
+                                    <Run Text="(INPUT)" />
+                                </Bold>
+                            </TextBlock>
+                            <Button
+                                Visibility="{Binding ViewModel.SuperUserManager.IsSuperUser, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                Content="🔑" 
+                                ToolTip="Brute-force SteamID" 
+                                FontSize="9" 
+                                Padding="3" 
+                                Margin="10,0,0,5"
+                                Command="{Binding ViewModel.BruteforceSteamIdCommand}" />
+                        </StackPanel>
                         <TextBox Text="{Binding ViewModel.UserIdInput, UpdateSourceTrigger=LostFocus, Mode=TwoWay}" />
                     </StackPanel>
                     <!--  Interchange  -->
