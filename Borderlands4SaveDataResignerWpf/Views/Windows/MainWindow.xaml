@@ -31,7 +31,16 @@
             <StackPanel>
                 <!--  Input Folder Path  -->
                 <StackPanel Margin="5,0,5,10">
-                    <Label Content="Input Folder Path" />
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Input Folder Path" />
+                        <Button
+                            Content="🎮" 
+                            ToolTip="Open SaveData directory" 
+                            FontSize="9" 
+                            Padding="3" 
+                            Margin="10,0,0,5"
+                            Command="{Binding ViewModel.OpenSaveDataDirectoryCommand}" />
+                    </StackPanel>
                     <Grid
                     p:DropProperties.DropOperationType="GetInputPath"
                     AllowDrop="True"

@@ -1,24 +1,35 @@
 ﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Borderlands4SaveDataResignerCore.Infrastructure;
 
 /// <summary>
 /// Provides utility methods and properties for managing application directory paths, including the root and output directories.
 /// </summary>
-public static class Directories
+public static partial class Directories
 {
     public static string RootPath => AppDomain.CurrentDomain.BaseDirectory;
 
     public static string Output { get; } = Path.Combine(RootPath, "_OUTPUT");
-
     public static void CreateOutput() => Directory.CreateDirectory(Output);
 
+    private static readonly string SaveDataDirectorySuffix = Path.Combine("Profiles", "client");
+
+    public static string SaveDataDirectoryWindows { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"Documents\My Games\Borderlands 4\Saved\SaveGames");
+    public static void CreateSaveDataDirectoryWindows() => Directory.CreateDirectory(SaveDataDirectoryWindows);
+
+    public static string ExtractUserId(this string filePath)
+        => UserIdFromFilePathRegex().Match(filePath).Groups[1].Value;
+    [GeneratedRegex("""(?:[\/\\])([a-fA-F0-9]+)(?:[\/\\]Profiles[\/\\]client)|(?:[\/\\])([a-fA-F0-9]+)(?:[\/\\])""")]
+    private static partial Regex UserIdFromFilePathRegex();
+    
     /// <summary>
     /// Creates all required output resources for the application.
     /// </summary>
     public static void CreateAll()
     {
         CreateOutput();
+        if (OperatingSystem.IsWindows()) CreateSaveDataDirectoryWindows();
     }
 
     /// <summary>
@@ -42,7 +53,7 @@ public static class Directories
             .Select(Path.GetDirectoryName)
             .Where(dir => dir != null)
             .Distinct()
-            .Select(dir => dir?.Replace(inputRootPath, Path.Combine(outputDirectory, userId)))
+            .Select(dir => dir?.Replace(inputRootPath, Path.Combine(outputDirectory, userId, SaveDataDirectorySuffix)))
             .ToArray();
         foreach (var dir in uniqueParentDirectories)
         {
@@ -63,19 +74,19 @@ public static class Directories
         string? openCmd = null;
         string? args = null;
 
-        if (Directory.Exists(path)) 
+        if (Directory.Exists(path))
         {
-            if (OperatingSystem.IsWindows()) 
+            if (OperatingSystem.IsWindows())
             {
                 openCmd = "explorer.exe";
                 args = $"\"{path}\"";
             }
-            else if (OperatingSystem.IsMacOS()) 
+            else if (OperatingSystem.IsMacOS())
             {
                 openCmd = "open";
                 args = $"\"{path}\"";
             }
-            else if (OperatingSystem.IsLinux() || OperatingSystem.IsFreeBSD()) 
+            else if (OperatingSystem.IsLinux() || OperatingSystem.IsFreeBSD())
             {
                 openCmd = "xdg-open";
                 args = $"\"{path}\"";

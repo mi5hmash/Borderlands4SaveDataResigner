@@ -38,7 +38,25 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _progressText = "Loading...";
     private readonly ProgressReporter _progressReporter;
     #endregion
-    
+
+    #region USER_ID
+    [ObservableProperty] private string _userIdInput;
+    [ObservableProperty] private string _userIdOutput;
+
+    [RelayCommand]
+    private void SwapUserIds()
+    {
+        (UserIdInput, UserIdOutput) = (UserIdOutput, UserIdInput);
+        _progressReporter.Report("User IDs has been swapped.");
+    }
+
+    private void ExtractUserIdFromFilePath()
+    {
+        var userId = InputFolderPath.ExtractUserId();
+        if (userId != string.Empty) UserIdInput = userId;
+    }
+    #endregion
+
     #region INPUT_FOLDER_PATH
     [ObservableProperty] private string _inputFolderPath = MyAppInfo.RootPath;
 
@@ -50,11 +68,16 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnInputFolderPathChanged(string value)
     {
-        if (Directory.Exists(value)) return;
+        if (Directory.Exists(value))
+        {
+            ExtractUserIdFromFilePath();
+            return;
+        }
         if (File.Exists(value))
         {
             _inputFolderPath = Path.GetDirectoryName(value) ?? string.Empty;
             _progressReporter.Report("Input Folder Path is valid.");
+            ExtractUserIdFromFilePath();
             return;
         }
         _progressReporter.Report("Invalid Input Folder Path!");
@@ -79,19 +102,7 @@ public partial class MainWindowViewModel : ObservableObject
     private static void OpenOutputDirectory()
         => Directories.OpenDirectory(Directories.Output);
     #endregion
-
-    #region USER_ID
-    [ObservableProperty] private string _userIdInput;
-    [ObservableProperty] private string _userIdOutput;
     
-    [RelayCommand]
-    private void SwapUserIds()
-    {
-        (UserIdInput, UserIdOutput) = (UserIdOutput, UserIdInput);
-        _progressReporter.Report("User IDs has been swapped.");
-    }
-    #endregion
-
     private CancellationTokenSource _cts = new();
     private readonly Core _core;
     private readonly AppSettingsManager<MyAppSettings, Json> _appSettingsManager;
@@ -228,6 +239,10 @@ public partial class MainWindowViewModel : ObservableObject
         IsAbortAllowed = false;
         IsBusy = false;
     }
+
+    [RelayCommand]
+    private static void OpenSaveDataDirectory()
+        => Directories.OpenDirectory(Directories.SaveDataDirectoryWindows);
 
 #if DEBUG
     [RelayCommand]
