@@ -15,21 +15,20 @@
 		<Company>$(Authors)</Company>
 		<Copyright>$(Authors) © $([System.DateTime]::UtcNow.Year)</Copyright>
 		<PackageProjectUrl>https://github.com/mi5hmash/Borderlands4SaveDataResigner</PackageProjectUrl>
-		<Description>Resigns, Decrypts &amp; Encrypts Borderlands 4 SaveData files.</Description>
+		<Description>Re-signs, Decrypts &amp; Encrypts Borderlands 4 SaveData files.</Description>
 		<ApplicationIcon>AppIcon.ico</ApplicationIcon>
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<Resource Include="AppIcon.ico" />
+		<Resource Include="Fonts\IconFont.otf" />
 		<Resource Include="Resources\Images\AppLogo.png" />
-		<Resource Include="Resources\Sounds\typewriter-machine.wav" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Mi5hmasH.AppSettings" Version="0.0.1" />
-		<PackageReference Include="Mi5hmasH.WpfHelper" Version="0.0.1" />
-		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+		<PackageReference Include="Mi5hmasH.WpfHelper" Version="0.0.2" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.141" />
 	</ItemGroup>
 
 	<ItemGroup>

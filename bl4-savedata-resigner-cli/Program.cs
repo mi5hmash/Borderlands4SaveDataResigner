@@ -118,31 +118,34 @@ return;
 
 static void PrintHelp()
 {
+    const string userIdInput = "76561197960265729";
+    const string userIdOutput = "76561197960265730";
     var inputPath = Path.Combine(".", "InputDirectory");
+    var gpPath = Path.Combine(inputPath, "1.sav");
     var exeName = Path.Combine(".", Path.GetFileName(Environment.ProcessPath) ?? "ThisExecutableFileName.exe");
     var helpMessage = $"""
-                       Usage: {exeName} -m <mode> [options]
+                        Usage: {exeName} -m <mode> [options]
 
-                       Modes:
-                         -m d           Decrypt SaveData files
-                         -m e           Encrypt SaveData files
-                         -m r           Resign SaveData files
-                         -m b           Bruteforce Steam ID for a SaveData file
+                        Modes:
+                          -m d  Decrypt SaveData files
+                          -m e  Encrypt SaveData files
+                          -m r  Re-sign SaveData files
+                          -m b  Bruteforce Steam ID for a SaveData file
 
-                       Options:
-                         -p <path>      Path to folder containing SaveData files or path to a single SaveData file (used in Bruteforce mode)
-                         -u <user_id>   User ID (used in decrypt/encrypt modes)
-                         -uI <old_id>   Original User ID (used in resign mode)
-                         -uO <new_id>   New User ID (used in resign mode)
-                         -v             Verbose output
-                         -h             Show this help message
+                        Options:
+                          -p <path>     Path to folder containing SaveData files or path to a single SaveData file (used in Bruteforce mode)
+                          -u <user_id>  User ID (used in decrypt/encrypt modes)
+                          -uI <old_id>  Original User ID (used in re-sign mode)
+                          -uO <new_id>  New User ID (used in re-sign mode)
+                          -v            Verbose output
+                          -h            Show this help message
 
-                       Examples:
-                         Decrypt: {exeName} -m d -p "{inputPath}" -u 76561197960265729
-                         Encrypt: {exeName} -m e -p "{inputPath}" -u 76561197960265729
-                         Resign : {exeName} -m r -p "{inputPath}" -uI 76561197960265729 -uO 76561197960265730
-                         Bruteforce: {exeName} -m b -p "{Path.Combine(inputPath, "1.sav")}"
-                       """;
+                        Examples:
+                          Decrypt:     {exeName} -m d -p "{inputPath}" -u {userIdInput}
+                          Encrypt:     {exeName} -m e -p "{inputPath}" -u {userIdOutput}
+                          Re-sign:     {exeName} -m r -p "{inputPath}" -uI {userIdInput} -uO {userIdOutput}
+                          Bruteforce:  {exeName} -m b -p "{gpPath}"
+                        """;
     Console.WriteLine(helpMessage);
 }
 

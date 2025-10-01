@@ -4,21 +4,13 @@ using Mi5hmasH.Logger;
 
 namespace Borderlands4SaveDataResignerCore;
 
-public class Core
+public class Core(SimpleLogger logger, ProgressReporter progressReporter)
 {
-    private readonly SimpleLogger _logger;
-
-    private readonly ProgressReporter _progressReporter;
-
-    private static void CreateDirectories() => Directories.CreateAll();
-
-    public Core(SimpleLogger logger, ProgressReporter progressReporter)
-    {
-        _logger = logger;
-        _progressReporter = progressReporter;
-        CreateDirectories();
-    }
-
+    /// <summary>
+    /// Creates a new ParallelOptions instance configured with the specified cancellation token and an optimal degree of parallelism for the current environment.
+    /// </summary>
+    /// <param name="cts">The CancellationTokenSource whose token will be used to support cancellation of parallel operations.</param>
+    /// <returns>A ParallelOptions object initialized with the provided cancellation token and a maximum degree of parallelism based on the number of available processors.</returns>
     private static ParallelOptions GetParallelOptions(CancellationTokenSource cts) 
         => new()
         {
@@ -26,21 +18,34 @@ public class Core
             MaxDegreeOfParallelism = Math.Max(Environment.ProcessorCount - 1, 1)
         };
 
+    /// <summary>
+    /// Asynchronously decrypts all files in the specified input directory for the given user.
+    /// </summary>
+    /// <param name="inputDir">The path to the directory containing the encrypted files to decrypt.</param>
+    /// <param name="userId">The identifier of the user whose files are to be decrypted.</param>
+    /// <param name="cts">A CancellationTokenSource that can be used to cancel the decryption operation.</param>
+    /// <returns>A task that represents the asynchronous decryption operation.</returns>
     public async Task DecryptFilesAsync(string inputDir, string userId, CancellationTokenSource cts)
         => await Task.Run(() => DecryptFiles(inputDir, userId, cts));
 
+    /// <summary>
+    /// Decrypts all encrypted files in the specified input directory using the private key derived from the provided user ID, and saves the decrypted files to a new output directory.
+    /// </summary>
+    /// <param name="inputDir">The path to the directory containing the encrypted files to decrypt. Only files matching the expected encrypted file extension are processed.</param>
+    /// <param name="userId">The user identifier used to calculate the private key for decryption.</param>
+    /// <param name="cts">A CancellationTokenSource used to cancel the decryption operation. If cancellation is requested, the method will stop processing remaining files.</param>
     public void DecryptFiles(string inputDir, string userId, CancellationTokenSource cts)
     {
+        // GET FILES TO PROCESS
         var filesToProcess = Directory.GetFiles(inputDir, $"*{Bl4Deencryptor.SaveFileExtension}", SearchOption.TopDirectoryOnly);
         if (filesToProcess.Length == 0) return;
-        _logger.LogInfo($"Decrypting [{filesToProcess.Length}] files...");
+        // DECRYPT
+        logger.LogInfo($"Decrypting [{filesToProcess.Length}] files...");
         // Calculate the private key based on the provided user ID
         var privateKey = Bl4Deencryptor.CalculatePrivateKey(userId);
-        // DECRYPT
         // Create a new folder in OUTPUT directory
-        var outputDir = Directories.GetNewOutputDirectory("decrypted");
-        // Crate the folder structure in the newly created output directory
-        Directories.CreateOutputFolderStructure(inputDir, outputDir, filesToProcess, userId);
+        var outputDir = Directories.GetNewOutputDirectory("decrypted").AddUserIdAndSuffix(userId);
+        Directory.CreateDirectory(outputDir);
         // Setup parallel options
         var po = GetParallelOptions(cts);
         // Process files in parallel
@@ -54,47 +59,65 @@ public class Core
                 try
                 {
                     ReadOnlySpan<byte> inputDataSpan = File.ReadAllBytes(filesToProcess[ctr]);
-                    _logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypting [{fileName}] file...", group);
+                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypting the [{fileName}] file...", group);
                     var outputDataSpan = Bl4Deencryptor.DecryptData(inputDataSpan, privateKey);
                     // Save the decrypted data to the output directory, preserving the folder structure and change the file extension to .yaml
-                    var outputFilePath = filesToProcess[ctr].Replace(inputDir, Path.Combine(outputDir, userId));
-                    outputFilePath = Path.ChangeExtension(outputFilePath, Bl4Deencryptor.YamlFileExtension);
+                    var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, Bl4Deencryptor.YamlFileExtension));
                     File.WriteAllBytes(outputFilePath, outputDataSpan);
-                    _logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypted [{fileName}] file.", group);
+                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypted the [{fileName}] file.", group);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to decrypt the [{fileName}] file: {e}", group);
+                    logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to decrypt the [{fileName}] file: {e}", group);
                 }
                 finally
                 {
                     Interlocked.Increment(ref progress);
-                    _progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
+                    progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
                 }
             });
-            _logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
+            logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
         }
         catch (OperationCanceledException e)
         {
-            _logger.LogWarning(e.Message);
+            logger.LogWarning(e.Message);
+        }
+        finally
+        {
+            // Ensure progress is set to 100% at the end
+            progressReporter.Report(100);
         }
     }
 
+    /// <summary>
+    /// Asynchronously encrypts all files in the specified directory for the given user.
+    /// </summary>
+    /// <param name="inputDir">The path to the directory containing files to encrypt.</param>
+    /// <param name="userId">The identifier of the user for whom the files will be encrypted.</param>
+    /// <param name="cts">A CancellationTokenSource that can be used to cancel the encryption operation.</param>
+    /// <returns>A task that represents the asynchronous encryption operation.</returns>
     public async Task EncryptFilesAsync(string inputDir, string userId, CancellationTokenSource cts)
         => await Task.Run(() => EncryptFiles(inputDir, userId, cts));
 
+    /// <summary>
+    /// Encrypts all YAML files in the specified input directory using the private key derived from the provided user ID.
+    /// The encrypted files are saved to a new output directory with updated file extensions.
+    /// </summary>
+    /// <param name="inputDir">The path to the directory containing the YAML files to encrypt.</param>
+    /// <param name="userId">The user identifier used to derive the encryption private key.</param>
+    /// <param name="cts">A CancellationTokenSource that can be used to cancel the encryption operation before completion.</param>
     public void EncryptFiles(string inputDir, string userId, CancellationTokenSource cts)
     {
+        // GET FILES TO PROCESS
         var filesToProcess = Directory.GetFiles(inputDir, $"*{Bl4Deencryptor.YamlFileExtension}", SearchOption.TopDirectoryOnly);
         if (filesToProcess.Length == 0) return;
-        _logger.LogInfo($"Encrypting [{filesToProcess.Length}] files...");
+        // ENCRYPT
+        logger.LogInfo($"Encrypting [{filesToProcess.Length}] files...");
         // Calculate the private key based on the provided user ID
         var privateKey = Bl4Deencryptor.CalculatePrivateKey(userId);
-        // ENCRYPT
         // Create a new folder in OUTPUT directory
-        var outputDir = Directories.GetNewOutputDirectory("encrypted");
-        // Crate the folder structure in the newly created output directory
-        Directories.CreateOutputFolderStructure(inputDir, outputDir, filesToProcess, userId);
+        var outputDir = Directories.GetNewOutputDirectory("encrypted").AddUserIdAndSuffix(userId);
+        Directory.CreateDirectory(outputDir);
         // Setup parallel options
         var po = GetParallelOptions(cts);
         // Process files in parallel
@@ -108,47 +131,66 @@ public class Core
                 try
                 {
                     ReadOnlySpan<byte> inputDataSpan = File.ReadAllBytes(filesToProcess[ctr]);
-                    _logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypting [{fileName}] file...", group);
+                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypting the [{fileName}] file...", group);
                     var outputDataSpan = Bl4Deencryptor.EncryptData(inputDataSpan, privateKey);
                     // Save the encrypted data to the output directory, preserving the folder structure and change the file extension to .sav
-                    var outputFilePath = filesToProcess[ctr].Replace(inputDir, Path.Combine(outputDir, userId));
-                    outputFilePath = Path.ChangeExtension(outputFilePath, Bl4Deencryptor.SaveFileExtension);
+                    var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, Bl4Deencryptor.SaveFileExtension));
                     File.WriteAllBytes(outputFilePath, outputDataSpan);
-                    _logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypted [{fileName}] file.", group);
+                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypted the [{fileName}] file.", group);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
+                    logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
                 }
                 finally
                 {
                     Interlocked.Increment(ref progress);
-                    _progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
+                    progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
                 }
             });
-            _logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
+            logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
         }
         catch (OperationCanceledException e)
         {
-            _logger.LogWarning(e.Message);
+            logger.LogWarning(e.Message);
+        }
+        finally
+        {
+            // Ensure progress is set to 100% at the end
+            progressReporter.Report(100); 
         }
     }
 
+    /// <summary>
+    /// Asynchronously re-signs all files in the specified input directory using the provided user identifiers.
+    /// </summary>
+    /// <param name="inputDir">The path to the directory containing the files to be re-signed.</param>
+    /// <param name="userIdInput">The user identifier associated with the original signatures of the files.</param>
+    /// <param name="userIdOutput">The user identifier to be used for the new signatures applied to the files.</param>
+    /// <param name="cts">A CancellationTokenSource that can be used to cancel the re-signing operation.</param>
+    /// <returns>A task that represents the asynchronous resigning operation.</returns>
     public async Task ResignFilesAsync(string inputDir, string userIdInput, string userIdOutput, CancellationTokenSource cts)
         => await Task.Run(() => ResignFiles(inputDir, userIdInput, userIdOutput, cts));
 
+    /// <summary>
+    /// Re-signs all save files in the specified directory by decrypting them with the original user ID and re-encrypting them with a new user ID.
+    /// </summary>
+    /// <param name="inputDir">The path to the directory containing the save files to be resigned.</param>
+    /// <param name="userIdInput">The user ID used to decrypt the original save files. Must be a valid identifier for the source user.</param>
+    /// <param name="userIdOutput">The user ID used to re-encrypt the save files. Must be a valid identifier for the target user.</param>
+    /// <param name="cts">A CancellationTokenSource used to cancel the operation if needed. If cancellation is requested, the process will terminate early.</param>
     public void ResignFiles(string inputDir, string userIdInput, string userIdOutput, CancellationTokenSource cts)
     {
+        // GET FILES TO PROCESS
         var filesToProcess = Directory.GetFiles(inputDir, $"*{Bl4Deencryptor.SaveFileExtension}", SearchOption.TopDirectoryOnly);
         if (filesToProcess.Length == 0) return;
-        _logger.LogInfo($"Resigning [{filesToProcess.Length}] files...");
+        // RE-SIGN
+        logger.LogInfo($"Re-signing [{filesToProcess.Length}] files...");
         // Calculate the private key based on the provided user ID
         var privateKey = Bl4Deencryptor.CalculatePrivateKey(userIdInput);
-        // RESIGN
         // Create a new folder in OUTPUT directory
-        var outputDir = Directories.GetNewOutputDirectory("resigned");
-        // Crate the folder structure in the newly created output directory
-        Directories.CreateOutputFolderStructure(inputDir, outputDir, filesToProcess, userIdOutput);
+        var outputDir = Directories.GetNewOutputDirectory("resigned").AddUserIdAndSuffix(userIdInput);
+        Directory.CreateDirectory(outputDir);
         // Setup parallel options
         var po = GetParallelOptions(cts);
         // Process files in parallel
@@ -163,7 +205,7 @@ public class Core
                     var group = $"Task {ctr}";
                     ReadOnlySpan<byte> encryptedDataSpan = File.ReadAllBytes(filesToProcess[ctr]);
                     // Decrypt the data with the old user's private key
-                    _logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypting [{fileName}] file...", group);
+                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypting the [{fileName}] file...", group);
                     byte[] decryptedData;
                     try
                     {
@@ -171,13 +213,13 @@ public class Core
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to decrypt the [{fileName}] file: {e}", group);
+                        logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to decrypt the [{fileName}] file: {e}", group);
                         break; // Skip to the next file
                     }
                     // Anonymize the decrypted data
-                    var decryptedDataWithUpdatedGuids = Bl4Deencryptor.AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), _logger, group);
+                    var decryptedDataWithUpdatedGuids = Bl4Deencryptor.AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
                     // Encrypt the updated data with the new user's private key
-                    _logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypting [{fileName}] file...", group);
+                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypting the [{fileName}] file...", group);
                     privateKey = Bl4Deencryptor.CalculatePrivateKey(userIdOutput);
                     byte[] resignedData;
                     try
@@ -186,29 +228,48 @@ public class Core
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
+                        logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
                         break; // Skip to the next file
                     }
-                    // Save the resigned data to the output directory, preserving the folder structure
-                    var outputFilePath = filesToProcess[ctr].Replace(inputDir, Path.Combine(outputDir, userIdOutput));
+                    // Save the re-signed data to the output directory, preserving the folder structure
+                    var outputFilePath = Path.Combine(outputDir, fileName);
                     File.WriteAllBytes(outputFilePath, resignedData);
-                    _logger.LogInfo($"[{progress}/{filesToProcess.Length}] Resigned [{fileName}] file.", group);
+                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Re-signed the [{fileName}] file.", group);
                     break;
                 }
                 Interlocked.Increment(ref progress);
-                _progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
+                progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
             });
-            _logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
+            logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
         }
         catch (OperationCanceledException e)
         {
-            _logger.LogWarning(e.Message);
+            logger.LogWarning(e.Message);
+        }
+        finally
+        {
+            // Ensure progress is set to 100% at the end
+            progressReporter.Report(100);
         }
     }
 
+    /// <summary>
+    /// Attempts to discover a valid Steam ID by processing the specified input file asynchronously.
+    /// </summary>
+    /// <param name="inputFile">The path to the input file containing data to be analyzed for Steam ID discovery.</param>
+    /// <param name="cts">A CancellationTokenSource used to cancel the operation if needed. If cancellation is requested, the method will terminate early.</param>
+    /// <returns>A nullable unsigned long representing the discovered Steam ID if found; otherwise, null.</returns>
     public async Task<ulong?> BruteforceSteamIdAsync(string inputFile, CancellationTokenSource cts)
         => await Task.Run(() => BruteforceSteamId(inputFile, cts));
 
+    /// <summary>
+    /// Attempts to discover the SteamID associated with a save file by performing a brute-force search over possible SteamID values.
+    /// </summary>
+    /// <param name="inputPath">The path to the save file or a directory containing save files. If a directory is provided, the method searches for the first file matching the expected save file extension.</param>
+    /// <param name="cts">A CancellationTokenSource used to cancel the brute-force operation. Pass a token to allow the operation to be interrupted.</param>
+    /// <returns>The discovered SteamID as an unsigned 64-bit integer if found; otherwise, null.</returns>
+    /// <exception cref="DirectoryNotFoundException">Thrown if <paramref name="inputPath"/> does not refer to an existing file or directory.</exception>
+    /// <exception cref="FileNotFoundException">Thrown if no save files matching the expected extension are found in the specified directory.</exception>
     public ulong? BruteforceSteamId(string inputPath, CancellationTokenSource cts)
     {
         ulong? result = null;
@@ -227,7 +288,7 @@ public class Core
                 fileToProcess = filesToProcess.FirstOrDefault() ?? string.Empty;
             }
             var fileName = Path.GetFileName(fileToProcess);
-            _logger.LogInfo("Brute-forcing SteamID...");
+            logger.LogInfo("Brute-forcing SteamID...");
             // Setup parallel options
             var po = GetParallelOptions(cts);
             uint lap = 0;
@@ -239,7 +300,7 @@ public class Core
                 if (lap % 10_000_000 == 0)
                 {
                     var progress = (double)lap / uint.MaxValue;
-                    _progressReporter.Report($"[{progress:P2}] Brute-forcing: {fileName}", (int)(progress * 100));
+                    progressReporter.Report($"[{progress:P2}] Brute-forcing: {fileName}", (int)(progress * 100));
                 }
                 if (Bl4Deencryptor.BruteforceSteamId(inputDataSpan, currentSteamId))
                 {
@@ -248,9 +309,17 @@ public class Core
                 }
                 Interlocked.Increment(ref lap);
             });
-            _logger.LogInfo(result is null ? "SteamID not found." : $"Found SteamID: {result}.");
+            logger.LogInfo(result is null ? "SteamID not found." : $"Found SteamID: {result}.");
         }
-        catch (Exception e) { _logger.LogWarning(e.Message); }
+        catch (Exception e)
+        {
+            logger.LogWarning(e.Message);
+        }
+        finally
+        {
+            // Ensure progress is set to 100% at the end
+            progressReporter.Report(100);
+        }
         return result;
     }
 }
