@@ -218,7 +218,7 @@ public static partial class Bl4Deencryptor
     /// </summary>
     /// <param name="encryptedData">A read-only span of bytes containing the encrypted data to test for decryption.</param>
     /// <param name="steamId">The Steam ID to use when calculating the decryption key.</param>
-    /// <returns>true if the encrypted data can be decrypted with the key derived from the specified Steam ID; otherwise, false.</returns>
+    /// <returns><see langword="true"/> if the encrypted data can be decrypted with the key derived from the specified Steam ID; otherwise, <see langword="false"/>.</returns>
     public static bool BruteforceSteamId(ReadOnlySpan<byte> encryptedData, ulong steamId)
     {
         // Calculate the private key using the Steam ID
@@ -282,6 +282,7 @@ public static partial class Bl4Deencryptor
     /// <returns>A byte array containing the encrypted data.</returns>
     public static byte[] EncryptData(ReadOnlySpan<byte> decryptedData, ReadOnlySpan<byte> privateKey)
     {
+        // Normalize line endings 
         decryptedData = decryptedData.CrLfToLf();
         // Calculate checksum and length of the decrypted data
         var decryptedDataChecksum = ComputeAdler32Checksum(decryptedData);

@@ -1,6 +1,8 @@
-﻿using Borderlands4SaveDataResignerWpf.ControlProperties;
-using Borderlands4SaveDataResignerWpf.ViewModels;
+﻿using Borderlands4SaveDataResignerWpf.ViewModels;
+using Mi5hmasH.WpfHelper;
+using Mi5hmasH.WpfHelper.ControlProperties;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace Borderlands4SaveDataResignerWpf.Views.Windows;
 
@@ -14,6 +16,15 @@ public partial class MainWindow
         DataContext = this;
 
         InitializeComponent();
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        // WINDOWS_10_DARK_THEME_FIX
+        if (!DarkModeWin10Helper.IsWindows10GreaterThan1809()) return;
+        var hwnd = new WindowInteropHelper(this).Handle;
+        DarkModeWin10Helper.FixImmersiveDarkMode(hwnd);
     }
 
     #region FILE_DROP

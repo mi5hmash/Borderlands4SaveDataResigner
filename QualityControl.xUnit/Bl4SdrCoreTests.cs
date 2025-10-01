@@ -39,7 +39,7 @@ public sealed class Bl4SdrCoreTests : IDisposable
         {
             await _core.DecryptFilesAsync(tempDir, "userId", cts);
         }
-        catch (Exception e)
+        catch
         {
             testResult = false;
         }
@@ -63,7 +63,7 @@ public sealed class Bl4SdrCoreTests : IDisposable
         {
             await _core.EncryptFilesAsync(tempDir, "userId", cts);
         }
-        catch (Exception e)
+        catch
         {
             testResult = false;
         }
@@ -87,7 +87,7 @@ public sealed class Bl4SdrCoreTests : IDisposable
         {
             await _core.ResignFilesAsync(tempDir, "userIdInput", "userIdOutput", cts);
         }
-        catch (Exception e)
+        catch
         {
             testResult = false;
         }
