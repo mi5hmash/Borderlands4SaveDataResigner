@@ -1,21 +1,19 @@
 ﻿<Application x:Class="Borderlands4SaveDataResignerWpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:s="clr-namespace:System;assembly=mscorlib"
+             xmlns:c="clr-namespace:Mi5hmasH.Utilities.Converters;assembly=Mi5hmasH.WpfHelper"
              StartupUri="/Views/Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!--  Load Fluent.xaml  -->
+                <!-- Load Fluent.xaml -->
                 <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.xaml" />
-                <!--  Load Custom Styles  -->
-                <ResourceDictionary Source="Styles/CustomStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <!--  Converters  -->
+            <!-- Converters -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <!--  Booleans  -->
-            <s:Boolean x:Key="True">True</s:Boolean>
-            <s:Boolean x:Key="False">False</s:Boolean>
+            <c:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <!-- Fonts -->
+            <FontFamily x:Key="IconFont">pack://application:,,,/Fonts/#IconFont</FontFamily>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

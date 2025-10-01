@@ -14,7 +14,7 @@
 		<Company>$(Authors)</Company>
 		<Copyright>$(Authors) © $([System.DateTime]::UtcNow.Year)</Copyright>
 		<PackageProjectUrl>https://github.com/mi5hmash/Borderlands4SaveDataResigner</PackageProjectUrl>
-		<Description>Resigns, Decrypts &amp; Encrypts Borderlands 4 SaveData files.</Description>
+		<Description>Re-signs, Decrypts &amp; Encrypts Borderlands 4 SaveData files.</Description>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<NoWarn>IL2104</NoWarn>
 	</PropertyGroup>
