@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > **This software is free and open source. If someone asks you to pay for it, it's likely a scam.**
 
-This command-line utility can **encrypt and decrypt SaveData files** from the Borderlands 4 game. It can also **resign SaveData files** with your own UserID so you can **load them on your User Account**.
+This application can **encrypt and decrypt SaveData files** from the Borderlands 4 game. It can also **resign SaveData files** with your own UserID so you can **load them on your User Account**.
 
 ## Supported platforms
 It only supports PC SaveData files from the Steam and Epic Games Store (EGS).
@@ -110,7 +110,7 @@ Options:
   -u <user_id>  User ID (used in decrypt/encrypt modes)
   -uI <old_id>  Original User ID (used in re-sign mode)
   -uO <new_id>  New User ID (used in re-sign mode)
-  -v            Verbose output
+  -q            Don't wait for user input to exit after operation completes (auto-close)
   -h            Show this help message
 ```
 
@@ -142,3 +142,7 @@ All the problems I've encountered during my tests have been fixed on the go. If 
 > This application creates a log file that may be helpful in troubleshooting.  
 It can be found in the same directory as the executable file.  
 Application stores up to two log files from the most recent sessions.
+
+## [ISSUE] Not all controls are visible in the WPF application on Windows
+You probably have your Windows system font size set higher than the default.
+Set the font size back to the default value, or press **`CTRL + SHIFT + J`** to unlock window resizing in the application.
