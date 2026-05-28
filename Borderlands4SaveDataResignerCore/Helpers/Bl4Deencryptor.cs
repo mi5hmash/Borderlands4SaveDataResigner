@@ -2,7 +2,6 @@
 using Mi5hmasH.GameLaunchers.Steam.Types;
 using Mi5hmasH.Logger;
 using System.Buffers.Binary;
-using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -122,36 +121,7 @@ public static partial class Bl4Deencryptor
     /// <returns>A new byte array containing the data with the specified padding removed.</returns>
     private static byte[] RemovePkcs7Padding(ReadOnlySpan<byte> data, int paddingLength)
         => data[..^paddingLength].ToArray();
-
-    /// <summary>
-    /// Decompresses a byte array that was compressed using the Zlib compression format.
-    /// </summary>
-    /// <param name="compressedData">A byte array containing the data to decompress.</param>
-    /// <returns>A byte array containing the decompressed data.</returns>
-    private static byte[] DecompressZlib(byte[] compressedData)
-    {
-        using var inputStream = new MemoryStream(compressedData);
-        using var zLibStream = new ZLibStream(inputStream, CompressionMode.Decompress);
-        using var outputStream = new MemoryStream();
-        zLibStream.CopyTo(outputStream);
-        return outputStream.ToArray();
-    }
-
-    /// <summary>
-    /// Compresses the specified data using the Zlib compression algorithm.
-    /// </summary>
-    /// <param name="data">The data to compress, represented as a read-only span of bytes.</param>
-    /// <returns>A byte array containing the compressed data.</returns>
-    private static byte[] CompressZlib(ReadOnlySpan<byte> data)
-    {
-        using var outputStream = new MemoryStream();
-        using (var zLibStream = new ZLibStream(outputStream, CompressionLevel.Optimal, true))
-        {
-            zLibStream.Write(data);
-        }
-        return outputStream.ToArray();
-    }
-
+    
     /// <summary>
     /// Computes the Adler-32 checksum for the specified data.
     /// </summary>
@@ -256,18 +226,18 @@ public static partial class Bl4Deencryptor
         // Checksum is stored in big-endian format so we need to reverse the byte order
         var expectedChecksum = BinaryPrimitives.ReadUInt32BigEndian(decryptedDataWithoutPadding.AsSpan()[^8..^4]);
         // Try to decompress the decrypted data using Zlib
-        var decompressedData = DecompressZlib(decryptedDataWithoutPadding[..^8]);
+        var decompressedData = Zlib.Decompress(decryptedDataWithoutPadding[..^8]);
         // Verify the length and checksum of the decompressed data
         var isLengthValid = decompressedData.Length == expectedDataLength;
-        var isChecksumValid = ComputeAdler32Checksum(decompressedData) == expectedChecksum;
+        var isChecksumValid = Zlib.ComputeAdler32Checksum(decompressedData) == expectedChecksum;
         // If the length or checksum is invalid and there was padding, try without removing the padding
         if ((!isLengthValid || !isChecksumValid) && isTherePadding)
         {
             expectedDataLength = BitConverter.ToInt32(decryptedData[^4..], 0);
             expectedChecksum = BinaryPrimitives.ReadUInt32BigEndian(decryptedData.AsSpan()[^8..^4]);
-            decompressedData = DecompressZlib(decryptedData[..^8]);
+            decompressedData = Zlib.Decompress(decryptedData[..^8]);
             isLengthValid = decompressedData.Length == expectedDataLength;
-            isChecksumValid = ComputeAdler32Checksum(decompressedData) == expectedChecksum;
+            isChecksumValid = Zlib.ComputeAdler32Checksum(decompressedData) == expectedChecksum;
             if (!isLengthValid || !isChecksumValid)
                 throw new InvalidDataException("Decryption failed: Invalid length or checksum.");
         }
@@ -288,7 +258,7 @@ public static partial class Bl4Deencryptor
         var decryptedDataChecksum = ComputeAdler32Checksum(decryptedData);
         var decryptedDataLength = decryptedData.Length;
         // Compress the decrypted data using Zlib
-        var compressedData = CompressZlib(decryptedData);
+        var compressedData = Zlib.Compress(decryptedData);
         // Prepare the data to be encrypted by appending the checksum and length
         var dataToEncrypt = new byte[compressedData.Length + 8];
         var dataToEncryptSpan = dataToEncrypt.AsSpan();
