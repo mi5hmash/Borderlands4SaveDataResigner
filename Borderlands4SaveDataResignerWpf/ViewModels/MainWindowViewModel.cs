@@ -1,5 +1,4 @@
 ﻿using Borderlands4SaveDataResignerCore;
-using Borderlands4SaveDataResignerCore.Helpers;
 using Borderlands4SaveDataResignerCore.Infrastructure;
 using Borderlands4SaveDataResignerWpf.Fonts;
 using Borderlands4SaveDataResignerWpf.Helpers;
@@ -8,16 +7,18 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mi5hmasH.AppInfo;
 using Mi5hmasH.AppSettings;
-using Mi5hmasH.AppSettings.Flavors;
 using Mi5hmasH.Logger;
 using Mi5hmasH.Logger.Models;
-using Mi5hmasH.Logger.Providers;
 using Microsoft.Win32;
 using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Media;
 using System.Windows;
+using Mi5hmasH.AppSettings.FlavorsFactory.Flavors;
+using Mi5hmasH.Logger.Enums;
+using Mi5hmasH.Logger.LogProvidersFactory.LogProviders;
+using Mi5hmasH.Progress;
 
 namespace Borderlands4SaveDataResignerWpf.ViewModels;
 
@@ -47,13 +48,17 @@ public partial class MainWindowViewModel : ObservableValidator
     #endregion
 
     #region UI_STATE
-    [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private bool _isAbortAllowed;
+    [ObservableProperty] 
+    public partial bool IsBusy { get; set; }
+    [ObservableProperty] 
+    public partial bool IsAbortAllowed { get; set; }
     #endregion
 
     #region PROGRESS_REPORTER
-    [ObservableProperty] private int _progressValue;
-    [ObservableProperty] private string _progressText = "Loading...";
+    [ObservableProperty] 
+    public partial int ProgressValue { get; set; }
+    [ObservableProperty] 
+    public partial string ProgressText { get; set; } = "Loading...";
     private readonly ProgressReporter _progressReporter;
     #endregion
 
@@ -72,7 +77,7 @@ public partial class MainWindowViewModel : ObservableValidator
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
             if (e.ExceptionObject is not Exception exception) return;
-            var logEntry = new LogEntry(SimpleLogger.LogSeverity.Critical, $"Unhandled Exception: {exception}");
+            var logEntry = new LogEntry(LogSeverityEnum.Critical, $"Unhandled Exception: {exception}");
             fileLogProvider.Log(logEntry);
             fileLogProvider.Flush();
         };
@@ -86,13 +91,13 @@ public partial class MainWindowViewModel : ObservableValidator
     [NotifyDataErrorInfo]
     [RegularExpression("^[0-9A-Fa-f]+$", ErrorMessage = "Only hexadecimal characters are allowed.")]
     [Required]
-    private string _userIdInput = "0";
+    public partial string UserIdInput { get; set; } = "0";
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
     [RegularExpression("^[0-9A-Fa-f]+$", ErrorMessage = "Only hexadecimal characters are allowed.")]
     [Required]
-    private string _userIdOutput = "0";
+    public partial string UserIdOutput { get; set; } = "0";
 
     [RelayCommand]
     private void SwapUserIds()
@@ -112,24 +117,26 @@ public partial class MainWindowViewModel : ObservableValidator
     [ObservableProperty]
     [NotifyDataErrorInfo]
     [Required]
-    private string _inputFolderPath = MyAppInfo.RootPath;
+    public partial string InputFolderPath { get; set; } = MyAppInfo.RootPath.TrimDirectorySeparator();
     
     partial void OnInputFolderPathChanged(string value)
     {
         if (Directory.Exists(value))
         {
+            value = value.TrimDirectorySeparator();
+            InputFolderPath = value;
             ExtractUserIdFromFilePath();
             return;
         }
         if (File.Exists(value))
         {
-            _inputFolderPath = Path.GetDirectoryName(value) ?? string.Empty;
+            InputFolderPath = Path.GetDirectoryName(value) ?? string.Empty;
             _progressReporter.Report("Input Folder Path is valid.");
             ExtractUserIdFromFilePath();
             return;
         }
         _progressReporter.Report("Invalid Input Folder Path!");
-        _inputFolderPath = string.Empty;
+        InputFolderPath = string.Empty;
     }
 
     [RelayCommand]
@@ -201,7 +208,8 @@ public partial class MainWindowViewModel : ObservableValidator
 
     private CancellationTokenSource _cts = new();
     private readonly Core _core;
-    [ObservableProperty] private SuperUserManager _superUserManager;
+    [ObservableProperty]
+    public partial SuperUserManager SuperUserManager { get; set; }
 
     public MainWindowViewModel()
     {
@@ -309,32 +317,6 @@ public partial class MainWindowViewModel : ObservableValidator
     [RelayCommand]
     private static void OpenSaveDataDirectory()
         => Directories.OpenDirectory(Directories.SaveDataDirectoryWindows);
-
-#if DEBUG
-    [RelayCommand]
-    private async Task Test()
-    {
-        _cts = new CancellationTokenSource();
-        await PerformAction(() => HugeTask(_cts), true);
-        _cts.Dispose();
-    } 
-
-    private async Task HugeTask(CancellationTokenSource cts)
-    {
-        const int totalSteps = 10;
-        _progressReporter.Report("Huge task started.", 0);
-        for (var i = 1; i <= totalSteps; i++)
-        {
-            await Task.Delay(1000);
-            if (cts.IsCancellationRequested) 
-            {
-                _progressReporter.Report("Huge task aborted!", 100);
-                return;
-            }
-            _progressReporter.Report($"Processing step {i}/{totalSteps}...", (int)((double)i / totalSteps * 100));
-        }
-        _progressReporter.Report("Huge task completed!", 100);
-    }
-#endif
+    
     #endregion
 }

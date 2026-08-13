@@ -8,10 +8,10 @@ namespace Borderlands4SaveDataResignerCore.Infrastructure;
 public static class Urls
 {
     public const string AuthorsGithub = "https://github.com/mi5hmash";
-    public static void OpenAuthorsGithub() => OpenUrl(AuthorsGithub);
+    public static void OpenAuthorsGithub() => AuthorsGithub.OpenUrl();
 
     public const string ProjectsRepo = $"{AuthorsGithub}/Borderlands4SaveDataResigner";
-    public static void OpenProjectsRepo() => OpenUrl(ProjectsRepo);
+    public static void OpenProjectsRepo() => ProjectsRepo.OpenUrl();
     
     /// <summary>
     /// Opens the given URL in the default web browser.

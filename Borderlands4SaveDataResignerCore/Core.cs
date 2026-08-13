@@ -1,6 +1,8 @@
-﻿using Borderlands4SaveDataResignerCore.Helpers;
+﻿using Borderlands4SaveDataResignerCore.Deencryption;
 using Borderlands4SaveDataResignerCore.Infrastructure;
 using Mi5hmasH.Logger;
+using Mi5hmasH.Progress;
+using static Borderlands4SaveDataResignerCore.Deencryption.Bl4DeencryptorHelper;
 
 namespace Borderlands4SaveDataResignerCore;
 
@@ -18,6 +20,14 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
             MaxDegreeOfParallelism = Math.Max(Environment.ProcessorCount - 1, 1)
         };
 
+    /// <summary>
+    /// Marks the progress reporting as complete by reporting 100% progress.
+    /// </summary>
+    /// <param name="progressTracker">The progress tracker used to report progress.</param>
+    /// <param name="errorCounter">The error counter used to report errors.</param>
+    private void LogAllTasksCompleted(ProgressTracker progressTracker, ErrorCounter errorCounter)
+        => logger.LogInfo($"{progressTracker} All tasks completed. {errorCounter}");
+    
     /// <summary>
     /// Asynchronously decrypts all files in the specified input directory for the given user.
     /// </summary>
@@ -37,55 +47,85 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
     public void DecryptFiles(string inputDir, string userId, CancellationTokenSource cts)
     {
         // GET FILES TO PROCESS
-        var filesToProcess = Directory.GetFiles(inputDir, $"*{Bl4Deencryptor.SaveFileExtension}", SearchOption.TopDirectoryOnly);
-        if (filesToProcess.Length == 0) return;
+        string[] filesToProcess;
+        try { filesToProcess = SaveDataFileIo.GetSaveFiles(inputDir); }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex.Message);
+            return;
+        }
+        // INITIALIZE PROGRESS TRACKER
+        var progressTracker = new ProgressTracker(filesToProcess.Length);
+        var errorCounter = new ErrorCounter(logger);
         // DECRYPT
-        logger.LogInfo($"Decrypting [{filesToProcess.Length}] files...");
-        // Calculate the private key based on the provided user ID
-        var privateKey = Bl4Deencryptor.CalculatePrivateKey(userId);
+        logger.LogInfo($"Decrypting [{progressTracker.Total}] files...");
         // Create a new folder in OUTPUT directory
         var outputDir = Directories.GetNewOutputDirectory("decrypted").AddUserIdAndSuffix(userId);
         Directory.CreateDirectory(outputDir);
         // Setup parallel options
         var po = GetParallelOptions(cts);
         // Process files in parallel
-        var progress = 0;
         try
         {
-            Parallel.For((long)0, filesToProcess.Length, po, (ctr, _) =>
-            {
-                var fileName = Path.GetFileName(filesToProcess[ctr]);
-                var group = $"Task {ctr}";
-                try
+            var key = CalculatePrivateKey(userId);
+            Parallel.For((long)0, filesToProcess.Length, po, 
+                () => new Bl4Decryptor(key), // per-thread init
+                (ctr, _, localDecryptor) =>
                 {
-                    ReadOnlySpan<byte> inputDataSpan = File.ReadAllBytes(filesToProcess[ctr]);
-                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypting the [{fileName}] file...", group);
-                    var outputDataSpan = Bl4Deencryptor.DecryptData(inputDataSpan, privateKey);
-                    // Save the decrypted data to the output directory, preserving the folder structure and change the file extension to .yaml
-                    var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, Bl4Deencryptor.YamlFileExtension));
-                    File.WriteAllBytes(outputFilePath, outputDataSpan);
-                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypted the [{fileName}] file.", group);
-                }
-                catch (Exception e)
-                {
-                    logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to decrypt the [{fileName}] file: {e}", group);
-                }
-                finally
-                {
-                    Interlocked.Increment(ref progress);
-                    progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
-                }
-            });
-            logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
+                    while (true)
+                    {
+                        var fileName = Path.GetFileName(filesToProcess[ctr]);
+                        var group = $"Task {ctr}";
+                    
+                        // Try to read file data
+                        byte[] inputData;
+                        try { inputData = File.ReadAllBytes(filesToProcess[ctr]); }
+                        catch (Exception ex)
+                        {
+                            errorCounter.AddError($"{progressTracker} Failed to read the [{fileName}] file: {ex}", group);
+                            break;
+                        }
+                        // Try to decrypt file data
+                        byte[] outputData;
+                        try
+                        {
+                            logger.LogInfo($"{progressTracker} Decrypting the [{fileName}] file...", group);
+                            outputData = localDecryptor.DecryptData(inputData);
+                        }
+                        catch (Exception ex)
+                        {
+                            errorCounter.AddError($"{progressTracker} Failed to process the [{fileName}] file data: {ex}", group);
+                            break;
+                        }
+                        // Try to save the decrypted file data
+                        try
+                        {
+                            var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, YamlFileExtension));
+                            File.WriteAllBytes(outputFilePath, outputData);
+                        }
+                        catch (Exception ex)
+                        {
+                            errorCounter.AddError($"{progressTracker} Failed to save the file: {ex}", group);
+                            break;
+                        }
+                        logger.LogInfo($"{progressTracker} Decrypted the [{fileName}] file.", group);
+                        break;
+                    }
+                    progressTracker.Increment();
+                    progressReporter.Report(progressTracker.Percentage);
+                    return localDecryptor;
+                }, 
+                localDecryptor => localDecryptor.Dispose()
+            );
+            LogAllTasksCompleted(progressTracker, errorCounter);
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException ex)
         {
-            logger.LogWarning(e.Message);
+            errorCounter.AddWarning(ex.Message);
         }
         finally
         {
-            // Ensure progress is set to 100% at the end
-            progressReporter.Report(100);
+            progressReporter.Complete();
         }
     }
 
@@ -109,58 +149,105 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
     public void EncryptFiles(string inputDir, string userId, CancellationTokenSource cts)
     {
         // GET FILES TO PROCESS
-        var filesToProcess = Directory.GetFiles(inputDir, $"*{Bl4Deencryptor.YamlFileExtension}", SearchOption.TopDirectoryOnly);
-        if (filesToProcess.Length == 0) return;
+        string[] filesToProcess;
+        try { filesToProcess = SaveDataFileIo.GetYamlFiles(inputDir); }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex.Message);
+            return;
+        }
+        // INITIALIZE PROGRESS TRACKER
+        var progressTracker = new ProgressTracker(filesToProcess.Length);
+        var errorCounter = new ErrorCounter(logger);
         // ENCRYPT
-        logger.LogInfo($"Encrypting [{filesToProcess.Length}] files...");
-        // Calculate the private key based on the provided user ID
-        var privateKey = Bl4Deencryptor.CalculatePrivateKey(userId);
+        logger.LogInfo($"Encrypting [{progressTracker.Total}] files...");
         // Create a new folder in OUTPUT directory
         var outputDir = Directories.GetNewOutputDirectory("encrypted").AddUserIdAndSuffix(userId);
         Directory.CreateDirectory(outputDir);
         // Setup parallel options
         var po = GetParallelOptions(cts);
         // Process files in parallel
-        var progress = 0;
         try
         {
-            Parallel.For((long)0, filesToProcess.Length, po, (ctr, _) =>
+            var key = CalculatePrivateKey(userId);
+            Parallel.For((long)0, filesToProcess.Length, po, 
+                () => new Bl4Encryptor(key), // per-thread init
+                (ctr, _, localEncryptor) =>
             {
-                var fileName = Path.GetFileName(filesToProcess[ctr]);
-                var group = $"Task {ctr}";
-                try
+                while (true)
                 {
-                    ReadOnlySpan<byte> inputDataSpan = File.ReadAllBytes(filesToProcess[ctr]);
-                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypting the [{fileName}] file...", group);
-                    var outputDataSpan = Bl4Deencryptor.EncryptData(inputDataSpan, privateKey);
-                    // Save the encrypted data to the output directory, preserving the folder structure and change the file extension to .sav
-                    var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, Bl4Deencryptor.SaveFileExtension));
-                    File.WriteAllBytes(outputFilePath, outputDataSpan);
-                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypted the [{fileName}] file.", group);
+                    var fileName = Path.GetFileName(filesToProcess[ctr]);
+                    var group = $"Task {ctr}";
+                    
+                    // Try to read file data
+                    byte[] inputData;
+                    try { inputData = File.ReadAllBytes(filesToProcess[ctr]); }
+                    catch (Exception ex)
+                    {
+                        errorCounter.AddError($"{progressTracker} Failed to read the [{fileName}] file: {ex}", group);
+                        break;
+                    }
+                    // Try to encrypt file data
+                    byte[] outputData;
+                    try
+                    {
+                        logger.LogInfo($"{progressTracker} Encrypting the [{fileName}] file...", group);
+                        outputData = localEncryptor.EncryptData(inputData);
+                    }
+                    catch (Exception ex)
+                    {
+                        errorCounter.AddError($"{progressTracker} Failed to process the [{fileName}] file data: {ex}", group);
+                        break;
+                    }
+                    // Try to save the encrypted file data
+                    try
+                    {
+                        var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, SaveFileExtension));
+                        File.WriteAllBytes(outputFilePath, outputData);
+                    }
+                    catch (Exception ex)
+                    {
+                        errorCounter.AddError($"{progressTracker} Failed to save the file: {ex}", group);
+                        break;
+                    }
+                    logger.LogInfo($"{progressTracker} Encrypted the [{fileName}] file.", group);
+                    break;
                 }
-                catch (Exception e)
-                {
-                    logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
-                }
-                finally
-                {
-                    Interlocked.Increment(ref progress);
-                    progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
-                }
-            });
-            logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
+                progressTracker.Increment();
+                progressReporter.Report(progressTracker.Percentage);
+                return localEncryptor;
+            }, 
+                localEncryptor => localEncryptor.Dispose()
+            );
+            LogAllTasksCompleted(progressTracker, errorCounter);
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException ex)
         {
-            logger.LogWarning(e.Message);
+            errorCounter.AddWarning(ex.Message);
         }
         finally
         {
-            // Ensure progress is set to 100% at the end
-            progressReporter.Report(100); 
+            progressReporter.Complete();
         }
     }
 
+    /// <summary>
+    /// Represents the local state for the re-signing process, encapsulating the decryption and encryption logic for a specific pair of user keys.
+    /// </summary>
+    /// <param name="keyInput">The key used for decrypting the original save files.</param>
+    /// <param name="keyOutput">The key used for encrypting the re-signed save files.</param>
+    private sealed class ResignerLocalState(byte[] keyInput, byte[] keyOutput) : IDisposable
+    {
+        public Bl4Decryptor Decryptor { get; } = new(keyInput);
+        public Bl4Encryptor Encryptor { get; } = new(keyOutput);
+
+        public void Dispose()
+        {
+            Decryptor.Dispose();
+            Encryptor.Dispose();
+        }
+    }
+    
     /// <summary>
     /// Asynchronously re-signs all files in the specified input directory using the provided user identifiers.
     /// </summary>
@@ -182,74 +269,100 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
     public void ResignFiles(string inputDir, string userIdInput, string userIdOutput, CancellationTokenSource cts)
     {
         // GET FILES TO PROCESS
-        var filesToProcess = Directory.GetFiles(inputDir, $"*{Bl4Deencryptor.SaveFileExtension}", SearchOption.TopDirectoryOnly);
-        if (filesToProcess.Length == 0) return;
+        string[] filesToProcess;
+        try { filesToProcess = SaveDataFileIo.GetSaveFiles(inputDir); }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex.Message);
+            return;
+        }
+        // INITIALIZE PROGRESS TRACKER
+        var progressTracker = new ProgressTracker(filesToProcess.Length);
+        var errorCounter = new ErrorCounter(logger);
         // RE-SIGN
-        logger.LogInfo($"Re-signing [{filesToProcess.Length}] files...");
-        // Calculate the private key based on the provided user ID
-        var privateKey = Bl4Deencryptor.CalculatePrivateKey(userIdInput);
+        logger.LogInfo($"Re-signing [{progressTracker.Total}] files...");
         // Create a new folder in OUTPUT directory
         var outputDir = Directories.GetNewOutputDirectory("resigned").AddUserIdAndSuffix(userIdInput);
         Directory.CreateDirectory(outputDir);
         // Setup parallel options
         var po = GetParallelOptions(cts);
         // Process files in parallel
-        var progress = 0;
         try
         {
-            Parallel.For((long)0, filesToProcess.Length, po, (ctr, _) =>
-            {
-                while (true)
+            var keyInput = CalculatePrivateKey(userIdInput);
+            var keyOutput = CalculatePrivateKey(userIdOutput);
+            Parallel.For((long)0, filesToProcess.Length, po, 
+                () => new ResignerLocalState(keyInput, keyOutput), // per-thread init
+                (ctr, _, resignerLocalState) =>
                 {
-                    var fileName = Path.GetFileName(filesToProcess[ctr]);
-                    var group = $"Task {ctr}";
-                    ReadOnlySpan<byte> encryptedDataSpan = File.ReadAllBytes(filesToProcess[ctr]);
-                    // Decrypt the data with the old user's private key
-                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Decrypting the [{fileName}] file...", group);
-                    byte[] decryptedData;
-                    try
+                    while (true)
                     {
-                        decryptedData = Bl4Deencryptor.DecryptData(encryptedDataSpan, privateKey);
+                        var fileName = Path.GetFileName(filesToProcess[ctr]);
+                        var group = $"Task {ctr}";
+                        
+                        // Try to read file data
+                        byte[] encryptedData;
+                        try { encryptedData = File.ReadAllBytes(filesToProcess[ctr]); }
+                        catch (Exception ex)
+                        {
+                            errorCounter.AddError($"{progressTracker} Failed to read the [{fileName}] file: {ex}", group);
+                            break;
+                        }
+                        // Try to decrypt file data
+                        byte[] decryptedData;
+                        try
+                        {
+                            logger.LogInfo($"{progressTracker} Decrypting the [{fileName}] file...", group);
+                            decryptedData = resignerLocalState.Decryptor.DecryptData(encryptedData);
+                        }
+                        catch (Exception ex)
+                        {
+                            errorCounter.AddError($"{progressTracker} Failed to process the [{fileName}] file data: {ex}", group);
+                            break;
+                        }
+                        // Anonymize the decrypted data
+                        var decryptedDataWithUpdatedGuids = AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
+                        // Try to encrypt file data
+                        byte[] resignedData;
+                        try
+                        {
+                            logger.LogInfo($"{progressTracker} Encrypting the [{fileName}] file...", group);
+                            resignedData = resignerLocalState.Encryptor.EncryptData(decryptedDataWithUpdatedGuids);
+                        }
+                        catch (Exception ex)
+                        {
+                            errorCounter.AddError($"{progressTracker} Failed to process the [{fileName}] file data: {ex}", group);
+                            break;
+                        }
+                        // Try to save the re-signed data to the output directory, preserving the folder structure
+                        try
+                        {
+                            var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, SaveFileExtension));
+                            File.WriteAllBytes(outputFilePath, resignedData);
+                        }
+                        catch (Exception ex)
+                        {
+                            errorCounter.AddError($"{progressTracker} Failed to save the file: {ex}", group);
+                            break;
+                        }
+                        logger.LogInfo($"{progressTracker} Re-signed the [{fileName}] file.", group);
+                        break;
                     }
-                    catch (Exception e)
-                    {
-                        logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to decrypt the [{fileName}] file: {e}", group);
-                        break; // Skip to the next file
-                    }
-                    // Anonymize the decrypted data
-                    var decryptedDataWithUpdatedGuids = Bl4Deencryptor.AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
-                    // Encrypt the updated data with the new user's private key
-                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Encrypting the [{fileName}] file...", group);
-                    privateKey = Bl4Deencryptor.CalculatePrivateKey(userIdOutput);
-                    byte[] resignedData;
-                    try
-                    {
-                        resignedData = Bl4Deencryptor.EncryptData(decryptedDataWithUpdatedGuids, privateKey);
-                    }
-                    catch (Exception e)
-                    {
-                        logger.LogError($"[{progress}/{filesToProcess.Length}] Failed to encrypt the [{fileName}] file: {e}", group);
-                        break; // Skip to the next file
-                    }
-                    // Save the re-signed data to the output directory, preserving the folder structure
-                    var outputFilePath = Path.Combine(outputDir, fileName);
-                    File.WriteAllBytes(outputFilePath, resignedData);
-                    logger.LogInfo($"[{progress}/{filesToProcess.Length}] Re-signed the [{fileName}] file.", group);
-                    break;
-                }
-                Interlocked.Increment(ref progress);
-                progressReporter.Report((int)((double)progress / filesToProcess.Length * 100));
-            });
-            logger.LogInfo($"[{progress}/{filesToProcess.Length}] All tasks completed.");
+                    progressTracker.Increment();
+                    progressReporter.Report(progressTracker.Percentage);
+                    return resignerLocalState;
+                }, 
+                resignerLocalState => resignerLocalState.Dispose()
+            );
+            LogAllTasksCompleted(progressTracker, errorCounter);
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException ex)
         {
-            logger.LogWarning(e.Message);
+            errorCounter.AddWarning(ex.Message);
         }
         finally
         {
-            // Ensure progress is set to 100% at the end
-            progressReporter.Report(100);
+            progressReporter.Complete();
         }
     }
 
@@ -268,57 +381,65 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
     /// <param name="inputPath">The path to the save file or a directory containing save files. If a directory is provided, the method searches for the first file matching the expected save file extension.</param>
     /// <param name="cts">A CancellationTokenSource used to cancel the brute-force operation. Pass a token to allow the operation to be interrupted.</param>
     /// <returns>The discovered SteamID as an unsigned 64-bit integer if found; otherwise, null.</returns>
-    /// <exception cref="DirectoryNotFoundException">Thrown if <paramref name="inputPath"/> does not refer to an existing file or directory.</exception>
-    /// <exception cref="FileNotFoundException">Thrown if no save files matching the expected extension are found in the specified directory.</exception>
     public ulong? BruteforceSteamId(string inputPath, CancellationTokenSource cts)
     {
         ulong? result = null;
+        // GET FILE TO PROCESS AND READ IT
+        string fileToProcess;
+        byte[] encryptedData;
         try
         {
-            string fileToProcess;
-            if (File.Exists(inputPath))
-                fileToProcess = inputPath;
-            else
-            {
-                if (!Directory.Exists(inputPath))
-                    throw new DirectoryNotFoundException($"The provided path '{inputPath}' is not a valid file or directory.");
-                var filesToProcess = Directory.GetFiles(inputPath, $"*{Bl4Deencryptor.SaveFileExtension}", SearchOption.TopDirectoryOnly);
-                if (filesToProcess.Length == 0)
-                    throw new FileNotFoundException($"No '{Bl4Deencryptor.SaveFileExtension}' files found in the provided directory '{inputPath}'.");
-                fileToProcess = filesToProcess.FirstOrDefault() ?? string.Empty;
-            }
-            var fileName = Path.GetFileName(fileToProcess);
-            logger.LogInfo("Brute-forcing SteamID...");
-            // Setup parallel options
-            var po = GetParallelOptions(cts);
-            uint lap = 0;
-            var inputDataSpan = File.ReadAllBytes(fileToProcess);
-            const ulong universeBase = 76561197960265729;
-            Parallel.For(0, uint.MaxValue, po, (ctr, state) =>
-            {
-                var currentSteamId = universeBase + (ulong)ctr;
-                if (lap % 10_000_000 == 0)
-                {
-                    var progress = (double)lap / uint.MaxValue;
-                    progressReporter.Report($"[{progress:P2}] Brute-forcing: {fileName}", (int)(progress * 100));
-                }
-                if (Bl4Deencryptor.BruteforceSteamId(inputDataSpan, currentSteamId))
-                {
-                    result = currentSteamId;
-                    state.Stop();
-                }
-                Interlocked.Increment(ref lap);
-            });
-            logger.LogInfo(result is null ? "SteamID not found." : $"Found SteamID: {result}.");
+            fileToProcess = SaveDataFileIo.GetSaveFile(inputPath);
+            encryptedData = File.ReadAllBytes(fileToProcess);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            logger.LogWarning(e.Message);
+            logger.LogError(ex.Message);
+            return result;
+        }
+        // INITIALIZE PROGRESS TRACKER
+        var progressTracker = new ProgressTracker(100);
+        var errorCounter = new ErrorCounter(logger);
+        // BRUTE-FORCE
+        const uint step = uint.MaxValue / 100;
+        var fileName = Path.GetFileName(fileToProcess);
+        // Setup parallel options
+        var po = GetParallelOptions(cts);
+        // Brute-force data in parallel
+        try
+        {
+            Parallel.For(0, uint.MaxValue, po,
+                () => new Bl4BruteforceSteamId(76561197960265729), // per-thread init
+                (ctr, state, localBruteforcer) =>
+                {
+                    while (true)
+                    {
+                        if (ctr % step == 0)
+                        {
+                            progressReporter.Report($"{progressTracker} Brute-forcing SteamID of {fileName}...", progressTracker.Percentage);
+                            progressTracker.Increment();
+                        }
+                        if (!localBruteforcer.TryAccountId(encryptedData, (uint)ctr)) return localBruteforcer;
+                        var found = localBruteforcer.GetUnmaskedSteamIdFromKey();
+                        result = found;
+                        state.Stop();
+                        return localBruteforcer;
+                    }
+                },
+                localBruteforcer => localBruteforcer.Dispose()
+            );
+            if (result is null) 
+                throw new Exception("SteamID not found.");
+            
+            logger.LogInfo($"Found SteamID: {result}.");
+        }
+        catch (Exception ex)
+        {
+            errorCounter.AddWarning(ex.Message);
         }
         finally
         {
-            // Ensure progress is set to 100% at the end
-            progressReporter.Report(100);
+            progressReporter.Complete();
         }
         return result;
     }

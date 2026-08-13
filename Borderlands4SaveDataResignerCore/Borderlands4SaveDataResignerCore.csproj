@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -6,19 +6,21 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<AssemblyVersion>2.0.1.0</AssemblyVersion>
+		<AssemblyVersion>2.1.0.0</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<Authors>Mi5hmasH</Authors>
 		<Company>$(Authors)</Company>
-		<Copyright>$(Authors) © $([System.DateTime]::UtcNow.Year)</Copyright>
+		<Copyright>Mi5hmasH © $([System.DateTime]::UtcNow.Year)</Copyright>
 		<PackageProjectUrl>https://github.com/mi5hmash/Borderlands4SaveDataResigner</PackageProjectUrl>
 		<Description>Re-signs, Decrypts &amp; Encrypts Borderlands 4 SaveData files.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Mi5hmasH.Compressors" Version="0.0.3" />
 		<PackageReference Include="Mi5hmasH.GameLaunchers" Version="0.0.1" />
-		<PackageReference Include="Mi5hmasH.Logger" Version="3.0.1" />
+		<PackageReference Include="Mi5hmasH.Logger" Version="3.0.2" />
+		<PackageReference Include="Mi5hmasH.Progress" Version="0.0.3" />
 	</ItemGroup>
 
 </Project>

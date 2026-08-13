@@ -1,6 +1,8 @@
 using Borderlands4SaveDataResignerCore;
-using Borderlands4SaveDataResignerCore.Helpers;
+using Borderlands4SaveDataResignerCore.Deencryption;
 using Mi5hmasH.Logger;
+using Mi5hmasH.Progress;
+using static Borderlands4SaveDataResignerCore.Deencryption.Bl4DeencryptorHelper;
 
 namespace QualityControl.xUnit;
 
@@ -101,24 +103,51 @@ public sealed class Bl4SdrCoreTests : IDisposable
     public void DecryptFiles_DoesDecrypt()
     {
         // Arrange
-        var privateKey = Bl4Deencryptor.CalculatePrivateKey("76561197960265729");
+        using var decryptor = new Bl4Decryptor(CalculatePrivateKey("76561197960265729"));
 
         // Act
-        var decryptedData = Bl4Deencryptor.DecryptData(Properties.Resources.encryptedFile, privateKey);
+        var decryptedData = decryptor.DecryptData(Properties.Resources.encryptedFile);
 
         // Assert
         Assert.Equal(decryptedData, Properties.Resources.decryptedFile);
+    }
+    
+    [Fact]
+    public void BruteforceFile_DoesBruteforce()
+    {
+        // Arrange
+        using var bruteforcer = new Bl4BruteforceSteamId(76561197960265729);
+
+        // Act
+        var test = bruteforcer.TryAccountId(Properties.Resources.encryptedFile, 1);
+
+        // Assert
+        Assert.True(test);
+    }
+    
+    [Fact]
+    public void BruteforceFile_DoesFailWithWrongUserId()
+    {
+        // Arrange
+        using var bruteforcer = new Bl4BruteforceSteamId(76561197960265729);
+
+        // Act
+        var test = bruteforcer.TryAccountId(Properties.Resources.encryptedFile, 2);
+
+        // Assert
+        Assert.False(test);
     }
 
     [Fact]
     public void EncryptFiles_DoesEncrypt()
     {
         // Arrange
-        var privateKey = Bl4Deencryptor.CalculatePrivateKey("76561197960265729");
+        using var encryptor = new Bl4Encryptor(CalculatePrivateKey("76561197960265729"));
+        using var decryptor = new Bl4Decryptor(CalculatePrivateKey("76561197960265729"));
 
         // Act
-        var encryptedData = Bl4Deencryptor.EncryptData(Properties.Resources.decryptedFile, privateKey);
-        var decryptedData = Bl4Deencryptor.DecryptData(encryptedData, privateKey);
+        var encryptedData = encryptor.EncryptData(Properties.Resources.decryptedFile);
+        var decryptedData = decryptor.DecryptData(encryptedData);
 
         // Assert
         Assert.Equal(decryptedData, Properties.Resources.decryptedFile);

@@ -12,7 +12,7 @@ This application can **encrypt and decrypt SaveData files** from the Borderlands
 It only supports PC SaveData files from the Steam and Epic Games Store (EGS).
 
 ## 🔄 Note about the conversion between the Steam and EGS platforms
-To convert SaveData files between the two platforms, use the resign mode and provide the correct User IDs for both the source and target platforms.
+To convert SaveData files between the two platforms, use the re-sign mode and provide the correct User IDs for both the source and target platforms.
 
 # 🤯 Why was it created :interrobang:
 I wanted to share a SaveData file with a friend, but it isn't possible by default.
