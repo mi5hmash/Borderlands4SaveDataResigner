@@ -1,9 +1,17 @@
-﻿using static Borderlands4SaveDataResignerCore.Deencryption.Bl4DeencryptorHelper;
-
-namespace Borderlands4SaveDataResignerCore.Infrastructure;
+﻿namespace Borderlands4SaveDataResignerCore.Infrastructure;
 
 public static class SaveDataFileIo
 {
+    /// <summary>
+    /// Represents the default file extension used for save files.
+    /// </summary>
+    public const string SaveFileExtension = ".sav";
+
+    /// <summary>
+    /// Represents the standard file extension for YAML files.
+    /// </summary>
+    public const string YamlFileExtension = ".yaml";
+    
     /// <summary>
     /// Gets all files with the save data file extension from the input directory.
     /// </summary>

@@ -1,26 +1,14 @@
 ﻿using System.Buffers.Binary;
 using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using Mi5hmasH.Compressors;
 using Mi5hmasH.GameLaunchers.Epic.Types;
 using Mi5hmasH.GameLaunchers.Steam.Types;
-using Mi5hmasH.Logger;
+using static Mi5hmasH.AesCrypto.Helpers.AesHelper;
 
 namespace Borderlands4SaveDataResignerCore.Deencryption;
 
-public static partial class Bl4DeencryptorHelper
+public static class Bl4DeencryptorHelper
 {
-    /// <summary>
-    /// Represents the default file extension used for save files.
-    /// </summary>
-    public const string SaveFileExtension = ".sav";
-
-    /// <summary>
-    /// Represents the standard file extension for YAML files.
-    /// </summary>
-    public const string YamlFileExtension = ".yaml";
-
     /// <summary>
     /// Represents the public key used for cryptographic operations.
     /// </summary>
@@ -29,6 +17,25 @@ public static partial class Bl4DeencryptorHelper
         0x35, 0xEC, 0x33, 0x77, 0xF3, 0x5D, 0xB0, 0xEA, 0xBE, 0x6B, 0x83, 0x11, 0x54, 0x03, 0xEB, 0xFB,
         0x27, 0x25, 0x64, 0x2E, 0xD5, 0x49, 0x06, 0x29, 0x05, 0x78, 0xBD, 0x60, 0xBA, 0x4A, 0xA7, 0x87
     ];
+    
+    /// <summary>
+    /// Represents the default padding mode used for AES encryption and decryption operations. In this case, no padding is applied to the data.
+    /// </summary>
+    private const PaddingMode DefaultPadding = PaddingMode.None;
+    
+    /// <summary>
+    /// Creates and initializes an <see cref="Aes"/> instance with the specified key.
+    /// </summary>
+    /// <param name="key">The encryption key to be used.</param>
+    /// <returns>A new <see cref="Aes"/> instance configured with ECB mode and no padding.</returns>
+    public static Aes GetAes(ReadOnlySpan<byte> key)
+    {
+        var aes = Aes.Create();
+        aes.Mode = CipherMode.ECB;
+        aes.Padding = DefaultPadding;
+        aes.Key = key.ToArray();
+        return aes;
+    }
     
     /// <summary>
     /// Parses the specified user ID string and converts it into a byte array.
@@ -74,49 +81,6 @@ public static partial class Bl4DeencryptorHelper
         return keyContainer.ToArray();
     }
     
-    private const PaddingMode DefaultPadding = PaddingMode.None;
-    
-    /// <summary>
-    /// Creates and initializes an <see cref="Aes"/> instance with the specified key.
-    /// </summary>
-    /// <param name="key">The encryption key to be used.</param>
-    /// <returns>A new <see cref="Aes"/> instance configured with ECB mode and no padding.</returns>
-    public static Aes GetAes(ReadOnlySpan<byte> key)
-    {
-        var aes = Aes.Create();
-        aes.Mode = CipherMode.ECB;
-        aes.Padding = DefaultPadding;
-        aes.Key = key.ToArray();
-        return aes;
-    }
-    
-    /// <summary>
-    /// Decrypts the specified encrypted data using AES in ECB mode.
-    /// </summary>
-    /// <param name="encryptedBytes">The encrypted data to decrypt.</param>
-    /// <param name="aes">A preconfigured AES instance.</param>
-    /// <returns>A byte array containing the decrypted data.</returns>
-    public static byte[] DecryptEcb(ReadOnlySpan<byte> encryptedBytes, Aes aes)
-    {
-        var decrypted = GC.AllocateUninitializedArray<byte>(encryptedBytes.Length);
-        aes.DecryptEcb(encryptedBytes, decrypted, DefaultPadding);
-        return decrypted;
-    }
-
-    /// <summary>
-    /// Encrypts the specified plaintext using AES encryption in ECB (Electronic Codebook) mode with PKCS7 padding.
-    /// </summary>
-    /// <param name="plainBytes">The plaintext data to encrypt, represented as a read-only span of bytes.</param>
-    /// <param name="aes">A preconfigured AES instance.</param>
-    /// <returns>A byte array containing the encrypted data.</returns>
-    public static byte[] EncryptEcb(ReadOnlySpan<byte> plainBytes, Aes aes)
-    {
-        var plainBytesWithPadding = AddPkcs7Padding(plainBytes);
-        var encrypted = GC.AllocateUninitializedArray<byte>(plainBytesWithPadding.Length);
-        aes.EncryptEcb(plainBytesWithPadding, encrypted, DefaultPadding);
-        return encrypted;
-    }
-
     /// <summary>
     /// Removes PKCS#7 padding from decrypted data, decompresses the Zlib-compressed payload, and validates integrity against embedded length and checksum metadata.
     /// </summary>
@@ -129,7 +93,7 @@ public static partial class Bl4DeencryptorHelper
         var paddingLength = GetPossiblePkcs7PaddingLength(decryptedData);
         var isTherePadding = paddingLength > 0;
         var decryptedDataWithoutPadding = isTherePadding
-            ? RemovePkcs7Padding(decryptedData, paddingLength)
+            ? decryptedData[..^paddingLength]
             : decryptedData;
         // Get the expected length and expected checksum from the decrypted data without padding
         var expectedDataLength = BinaryPrimitives.ReadInt32LittleEndian(decryptedDataWithoutPadding[^4..]);
@@ -155,154 +119,20 @@ public static partial class Bl4DeencryptorHelper
     }
 
     /// <summary>
-    /// Adds PKCS#7 padding to the specified data to ensure its length is a multiple of the block size.
+    /// Creates a byte array container for SaveData, padded to the next 16-byte boundary using PKCS#7-style padding.
     /// </summary>
-    /// <param name="data">The input data to which padding will be added.</param>
-    /// <returns>A new byte array containing the original data followed by PKCS#7 padding bytes.</returns>
-    private static byte[] AddPkcs7Padding(ReadOnlySpan<byte> data)
+    /// <param name="dataLength">The length of the original data that will occupy the container.
+    /// The container is extended and padded so its total length is aligned to a 16-byte boundary.</param>
+    /// <returns>
+    /// A byte array of the padded length, where the trailing bytes contain the padding value indicating
+    /// how many padding bytes were added. The remaining bytes are uninitialized.
+    /// </returns>
+    public static byte[] CreateSaveDataContainerWithPadding(int dataLength)
     {
-        const int blockSize = 16;
-        var padLen = blockSize - data.Length % blockSize;
-        var newDataLength = data.Length + padLen;
-        var dataWithPadding = GC.AllocateUninitializedArray<byte>(newDataLength);
-        var dataWithPaddingAsSpan = dataWithPadding.AsSpan();
-        data.CopyTo(dataWithPaddingAsSpan);
-        for (var i = 1; i < padLen + 1; i++)
-            dataWithPaddingAsSpan[^i] = (byte)padLen;
-        return dataWithPadding;
+        var padLen = CalculatePkcs7PaddingLength(dataLength);
+        var dataContainer = GC.AllocateUninitializedArray<byte>(dataLength + padLen);
+        AddPkcs7PaddingInPlace(dataContainer, padLen);
+        
+        return dataContainer;
     }
-
-    /// <summary>
-    /// Determines the possible PKCS#7 padding length in the provided data.
-    /// </summary>
-    /// <param name="data">A read-only span of bytes representing the data to analyze. The data must be at least 16 bytes long to contain valid PKCS#7 padding.</param>
-    /// <returns>The length of the PKCS#7 padding if valid padding is detected; otherwise, 0.</returns>
-    private static int GetPossiblePkcs7PaddingLength(ReadOnlySpan<byte> data)
-    {
-        if (data.Length < 16) return 0;
-        var padLen = data[^1];
-        if (padLen is > 16 or < 1) return 0;
-        // Thank you Dxian998 for proposing a cleaner loop.
-        for (var i = 1; i <= padLen; i++)
-            if (data[^i] != padLen) return 0;
-
-        return padLen;
-    }
-
-    /// <summary>
-    /// Removes PKCS#7 padding from the specified data.
-    /// </summary>
-    /// <param name="data">The input data from which the padding will be removed.</param>
-    /// <param name="paddingLength">The length of the padding to remove, in bytes.</param>
-    /// <returns>A new byte array containing the data with the specified padding removed.</returns>
-    private static byte[] RemovePkcs7Padding(ReadOnlySpan<byte> data, int paddingLength)
-        => data[..^paddingLength].ToArray();
-    
-    /// <summary>
-    /// Converts all Windows-style line endings (CRLF) in the specified UTF-8 encoded YAML content to Unix-style line endings (LF).
-    /// </summary>
-    /// <param name="yamlContent">A byte array containing the YAML content encoded in UTF-8.</param>
-    /// <returns>A byte array containing the YAML content with all CRLF sequences replaced by LF, encoded in UTF-8.</returns>
-    public static byte[] CrLfToLf(this ReadOnlySpan<byte> yamlContent)
-    {
-        var yamlContentText = Encoding.UTF8.GetString(yamlContent);
-        yamlContentText = yamlContentText.Replace("\r\n", "\n");
-        return Encoding.UTF8.GetBytes(yamlContentText);
-    }
-    
-    /// <summary>
-    /// Anonymizes the data in the provided YAML content based on the specified file name.
-    /// </summary>
-    /// <param name="yamlContent">The YAML content as a byte array to be updated.</param>
-    /// <param name="fileNameWithoutExtension">The name of the file, without its extension, used to determine the type of data updates to apply.</param>
-    /// <param name="logger">An instance of <see cref="SimpleLogger"/> used to log warnings if the anonymization fail.</param>
-    /// <param name="loggerGroup">The logger group name used to categorize log messages.</param>
-    /// <returns>A byte array containing the updated YAML content.</returns>
-    public static byte[] AnonymizeSaveData(byte[] yamlContent, string fileNameWithoutExtension, SimpleLogger logger, string loggerGroup)
-    {
-        var yamlContentText = Encoding.UTF8.GetString(yamlContent);
-        if (fileNameWithoutExtension != "profile")
-        {
-            if (!UpdateCharGuid(ref yamlContentText))
-                logger.LogWarning("Character GUID could NOT be updated!", loggerGroup);
-        }
-        if (!UpdateSaveGuid(ref yamlContentText))
-            logger.LogWarning("Save GUID could NOT be updated!", loggerGroup);
-        if (!AnonymizeOnlineCharacterPrefs(ref yamlContentText))
-            logger.LogWarning("OnlineCharacterPrefs could NOT be updated!", loggerGroup);
-        return Encoding.UTF8.GetBytes(yamlContentText);
-    }
-    
-    /// <summary>
-    /// Generates a new globally unique identifier (GUID) as a 32-character uppercase string without hyphens.
-    /// </summary>
-    /// <returns>A string containing the newly generated GUID in uppercase, with no hyphens.</returns>
-    private static string NewGuid()
-    {
-        Span<char> buffer = stackalloc char[32];
-        Guid.NewGuid().TryFormat(buffer, out _, "N");
-        return new string(buffer).ToUpperInvariant();
-    }
-    
-    /// <summary>
-    /// Updates the value of the first occurrence of a 32-character hexadecimal GUID following the "char_guid:" prefix in the specified text.
-    /// </summary>
-    /// <param name="dataText">The text to search and update.</param>
-    /// <returns><see langword="true"/> if at least one GUID was replaced; otherwise, <see langword="false"/>.</returns>
-    private static bool UpdateCharGuid(ref string dataText)
-    {
-        var newGuid = NewGuid();
-        var replacementsCount = 0;
-        dataText = CharGuidRegex().Replace(dataText, _ =>
-        {
-            replacementsCount++;
-            return newGuid;
-        });
-        return replacementsCount > 0;
-    }
-    [GeneratedRegex("""(?<=char_guid:\s)[A-Fa-f0-9]{32}""")]
-    private static partial Regex CharGuidRegex();
-
-    /// <summary>
-    /// Updates the GUID in the save game header within the specified text.
-    /// </summary>
-    /// <param name="dataText">The text to search and update.</param>
-    /// <returns><see langword="true"/> if at least one GUID was replaced; otherwise, <see langword="false"/>.</returns>
-    private static bool UpdateSaveGuid(ref string dataText)
-    {
-        var newGuid = NewGuid();
-        var replacementsCount = 0;
-        dataText = SaveGameHeaderRegex().Replace(dataText, _ =>
-        {
-            replacementsCount++;
-            return newGuid;
-        });
-        return replacementsCount > 0;
-    }
-    [GeneratedRegex("""(?<=save_game_header:\s*\r?\n\s*guid:\s)[A-Fa-f0-9]{32}""")]
-    private static partial Regex SaveGameHeaderRegex();
-
-    /// <summary>
-    /// Anonymizes the "onlinecharacterprefs" section in the provided text.
-    /// </summary>
-    /// <param name="dataText">A reference to the string containing the text to be updated. The method searches for the "onlinecharacterprefs" section and replaces it with a predefined structure.</param>
-    /// <returns><see langword="true"/> if the "onlinecharacterprefs" section was found and replaced; otherwise, <see langword="false"/>.</returns>
-    private static bool AnonymizeOnlineCharacterPrefs(ref string dataText)
-    {
-        // Replacement string
-        const string replacement = """
-                                   onlinecharacterprefs:
-                                     recentfriends:
-                                     partyleader:
-                                   """;
-        var replacementsCount = 0;
-        dataText = OnlineCharacterPrefsRegex().Replace(dataText, _ =>
-        {
-            replacementsCount++;
-            return replacement;
-        });
-        return replacementsCount > 0;
-    }
-    [GeneratedRegex("""onlinecharacterprefs:\s*(?:\n\s+.*)+""")]
-    private static partial Regex OnlineCharacterPrefsRegex();
 }

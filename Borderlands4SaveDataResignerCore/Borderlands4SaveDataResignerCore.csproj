@@ -17,8 +17,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Mi5hmasH.AesCrypto" Version="0.1.0" />
 		<PackageReference Include="Mi5hmasH.Compressors" Version="0.0.3" />
-		<PackageReference Include="Mi5hmasH.GameLaunchers" Version="0.0.1" />
+		<PackageReference Include="Mi5hmasH.GameLaunchers" Version="0.0.2" />
 		<PackageReference Include="Mi5hmasH.Logger" Version="3.0.2" />
 		<PackageReference Include="Mi5hmasH.Progress" Version="0.0.3" />
 	</ItemGroup>

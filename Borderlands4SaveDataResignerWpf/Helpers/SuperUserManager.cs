@@ -28,7 +28,7 @@ public partial class SuperUserManager : ObservableObject
     }
 
     [RelayCommand]
-    public void SuperUserTriggerClick()
+    private void SuperUserTriggerClick()
     {
         if (IsSuperUser) return;
 

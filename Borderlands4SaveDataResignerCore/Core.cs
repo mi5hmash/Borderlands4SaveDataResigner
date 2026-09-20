@@ -100,7 +100,7 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
                         // Try to save the decrypted file data
                         try
                         {
-                            var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, YamlFileExtension));
+                            var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, SaveDataFileIo.YamlFileExtension));
                             File.WriteAllBytes(outputFilePath, outputData);
                         }
                         catch (Exception ex)
@@ -202,7 +202,7 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
                     // Try to save the encrypted file data
                     try
                     {
-                        var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, SaveFileExtension));
+                        var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, SaveDataFileIo.SaveFileExtension));
                         File.WriteAllBytes(outputFilePath, outputData);
                     }
                     catch (Exception ex)
@@ -321,7 +321,7 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
                             break;
                         }
                         // Anonymize the decrypted data
-                        var decryptedDataWithUpdatedGuids = AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
+                        var decryptedDataWithUpdatedGuids = Bl4SaveDataFileHelper.AnonymizeSaveData(decryptedData, Path.GetFileNameWithoutExtension(fileName), logger, group);
                         // Try to encrypt file data
                         byte[] resignedData;
                         try
@@ -337,7 +337,7 @@ public class Core(SimpleLogger logger, ProgressReporter progressReporter)
                         // Try to save the re-signed data to the output directory, preserving the folder structure
                         try
                         {
-                            var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, SaveFileExtension));
+                            var outputFilePath = Path.Combine(outputDir, Path.ChangeExtension(fileName, SaveDataFileIo.SaveFileExtension));
                             File.WriteAllBytes(outputFilePath, resignedData);
                         }
                         catch (Exception ex)

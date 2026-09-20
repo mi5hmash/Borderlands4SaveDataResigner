@@ -1,6 +1,8 @@
 ﻿using System.Buffers.Binary;
-using Borderlands4SaveDataResignerCore.Deencryption.Aes256;
-using Borderlands4SaveDataResignerCore.Deencryption.Aes256.Backends;
+using Mi5hmasH.AesCrypto.Flavors.Ecb;
+using Mi5hmasH.AesCrypto.Helpers;
+using Mi5hmasH.AesCrypto.Interfaces;
+using static Borderlands4SaveDataResignerCore.Deencryption.Bl4DeencryptorHelper;
 using Mi5hmasH.Compressors;
 
 namespace Borderlands4SaveDataResignerCore.Deencryption;
@@ -18,9 +20,9 @@ public sealed class Bl4Encryptor(ReadOnlySpan<byte> privateKey) : IDisposable
     /// The AES-256 ECB backend used for encryption operations.
     /// Uses hardware-accelerated AES-NI instructions when available; otherwise falls back to the managed .NET cryptography implementation.
     /// </summary>
-    private readonly IAesEcbBackend _backend = AesEcb256Ni.IsAesNiSupported() 
-        ? new AesNiBackend(privateKey, false)
-        : new AesManagedBackend(privateKey);
+    private readonly IAesBackend _backend = AesHelper.IsAesNiSupported()
+        ? new AesEcb256NiBackend(privateKey, false)
+        : new AesEcb256ManagedBackend(GetAes(privateKey));
     
     /// <summary>
     /// Encrypts the specified data using AES encryption in ECB mode.
@@ -37,7 +39,7 @@ public sealed class Bl4Encryptor(ReadOnlySpan<byte> privateKey) : IDisposable
         // Compress the decrypted data using Zlib
         var compressedData = decryptedData.ToArray().ZLibCompress();
         // Prepare the data to be encrypted by appending the checksum and length
-        var dataToEncrypt = GC.AllocateUninitializedArray<byte>(compressedData.Length + 8);
+        var dataToEncrypt = CreateSaveDataContainerWithPadding(compressedData.Length + 8);
         var dataToEncryptSpan = dataToEncrypt.AsSpan();
         compressedData.CopyTo(dataToEncryptSpan);
         BinaryPrimitives.WriteUInt32BigEndian(dataToEncryptSpan[^8..^4], decryptedDataChecksum);

@@ -1,5 +1,6 @@
-﻿using Borderlands4SaveDataResignerCore.Deencryption.Aes256;
-using Borderlands4SaveDataResignerCore.Deencryption.Aes256.Backends;
+﻿using Mi5hmasH.AesCrypto.Flavors.Ecb;
+using Mi5hmasH.AesCrypto.Helpers;
+using Mi5hmasH.AesCrypto.Interfaces;
 using static Borderlands4SaveDataResignerCore.Deencryption.Bl4DeencryptorHelper;
 
 namespace Borderlands4SaveDataResignerCore.Deencryption;
@@ -20,10 +21,10 @@ public sealed class Bl4Decryptor(ReadOnlySpan<byte> privateKey) : IDisposable
     /// AES-256 ECB backend used for decryption operations.
     /// Uses hardware-accelerated AES-NI instructions when available, otherwise falls back to the managed software implementation.
     /// </summary>
-    private readonly IAesEcbBackend _backend = AesEcb256Ni.IsAesNiSupported() 
-        ? new AesNiBackend(privateKey, true)
-        : new AesManagedBackend(privateKey);
-
+    private readonly IAesBackend _backend = AesHelper.IsAesNiSupported()
+        ? new AesEcb256NiBackend(privateKey, true)
+        : new AesEcb256ManagedBackend(GetAes(privateKey));
+    
     /// <summary>
     /// Decrypts the specified encrypted data.
     /// </summary>

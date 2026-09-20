@@ -163,7 +163,7 @@ public partial class MainWindowViewModel : ObservableValidator
     private const string SettingsMagic = "OUV0k8JXQafInOjo1p8e8v3WYKqOtTdWXL4/o8QnVtM=";
     private void InitializeSettings()
     {
-        _appSettingsManager.SetEncryptor(SettingsMagic);
+        _appSettingsManager.SetEncryptionKey(SettingsMagic);
         try { _appSettingsManager.Load(); }
         catch
         {

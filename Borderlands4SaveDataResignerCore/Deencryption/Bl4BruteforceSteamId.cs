@@ -1,7 +1,8 @@
 ﻿using System.Buffers.Binary;
 using System.Runtime.InteropServices;
-using Borderlands4SaveDataResignerCore.Deencryption.Aes256;
-using Borderlands4SaveDataResignerCore.Deencryption.Aes256.Backends;
+using Mi5hmasH.AesCrypto.Flavors.Ecb;
+using Mi5hmasH.AesCrypto.Helpers;
+using Mi5hmasH.AesCrypto.Interfaces;
 using Mi5hmasH.Compressors;
 using static Borderlands4SaveDataResignerCore.Deencryption.Bl4DeencryptorHelper;
 
@@ -21,7 +22,7 @@ public sealed class Bl4BruteforceSteamId : IDisposable
 {
     private static readonly uint AccountIdMask = BinaryPrimitives.ReadUInt32LittleEndian(PublicKey);
     private readonly byte[] _keyTemplate;
-    private readonly IAesEcbBackend _backend;
+    private readonly IAesBackend _backend;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Bl4BruteforceSteamId"/> class with the specified universe base value.
@@ -30,9 +31,9 @@ public sealed class Bl4BruteforceSteamId : IDisposable
     public Bl4BruteforceSteamId(ulong universeBase)
     {
         _keyTemplate = BuildSteamBruteforceKeyTemplate(universeBase);
-        _backend = AesEcb256Ni.IsAesNiSupported() 
-            ? new AesNiBackend(_keyTemplate, true)
-            : new AesManagedBackend(_keyTemplate);
+        _backend = AesHelper.IsAesNiSupported()
+            ? new AesEcb256NiBackend(_keyTemplate, true)
+            : new AesEcb256ManagedBackend(GetAes(_keyTemplate));
     }
 
     /// <summary>
